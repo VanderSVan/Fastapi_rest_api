@@ -1,4 +1,4 @@
 .idea
-/.env
+/src/.env
 /gg.py
 /src/logger/logs/
