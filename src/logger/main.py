@@ -10,7 +10,7 @@ def set_level_for_other_loggers(excluding: list, level_name: str = 'CRITICAL') -
     if level_name.upper() in level_names:
         processed_level_name = level_name.upper()
     else:
-        processed_level_name = 'CRITICAL'
+        processed_level_name = 'ERROR'
 
     for logger_name in logging.Logger.manager.loggerDict:
         if logger_name.split('.')[0] in excluding:
@@ -19,9 +19,9 @@ def set_level_for_other_loggers(excluding: list, level_name: str = 'CRITICAL') -
             logging.getLogger(logger_name).setLevel(processed_level_name)
 
 
-set_level_for_other_loggers(excluding=['uvicorn', 'sqlalchemy'], level_name='INFO')
+set_level_for_other_loggers(excluding=['uvicorn', 'sqlalchemy'], level_name='ERROR')
 logging.config.dictConfig(logger_config)
-logger = logging.getLogger('pages_parser_full')
+logger = logging.getLogger('pages_parser_files')
 
 
 if __name__ == '__main__':
