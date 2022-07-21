@@ -170,7 +170,7 @@ logger_config = {
             'format': "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)s - %(message)s"
         },
         'color': {
-            'format': "%(asctime)s - %(threadName)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)s - %(message)s",
+            'format': "%(levelname)s - %(module)s:%(funcName)s:%(lineno)s - %(message)s",
             '()': ColoredFormatter
         }
     },

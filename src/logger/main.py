@@ -21,7 +21,7 @@ def set_level_for_other_loggers(excluding: list, level_name: str = 'CRITICAL') -
 
 set_level_for_other_loggers(excluding=['uvicorn', 'sqlalchemy'], level_name='ERROR')
 logging.config.dictConfig(logger_config)
-logger = logging.getLogger('pages_parser_files')
+logger = logging.getLogger('pages_parser_full')
 
 
 if __name__ == '__main__':
