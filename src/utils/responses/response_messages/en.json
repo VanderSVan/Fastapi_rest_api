@@ -1,0 +1,7 @@
+{
+  "post": "{} id={} was successfully created",
+  "put": "{} id={} was successfully updated",
+  "delete": "{} id={} was successfully deleted",
+  "not_found": "{} id={} not found",
+  "exists": "{} id={} already exists"
+}
