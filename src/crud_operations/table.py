@@ -5,6 +5,10 @@ from ..models.table import TableModel
 
 
 class TableOperation(ModelOperation):
+    def __init__(self, db):
+        self.model = TableModel
+        self.response_elem_name = 'table'
+        self.db = db
 
     def find_all_by_params(self, **kwargs) -> list[TableModel]:
         type = kwargs.get('type')

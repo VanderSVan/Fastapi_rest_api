@@ -6,7 +6,6 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..models.schedule import ScheduleModel
 from ..schemas.schedule.base_schemas import (ScheduleGetSchema,
                                              SchedulePutSchema,
                                              SchedulePostSchema)
@@ -28,9 +27,7 @@ class Schedule:
     db: Session = Depends(get_db)
 
     def __init__(self):
-        self.schedule_operation = ScheduleOperation(model=ScheduleModel,
-                                                    response_elem_name='schedule',
-                                                    db=self.db)
+        self.schedule_operation = ScheduleOperation(db=self.db)
 
     @router.get("/", response_model=list[ScheduleGetSchema], status_code=status.HTTP_200_OK)
     def get_all_schedules(self, day: str | date = Query(default=None,

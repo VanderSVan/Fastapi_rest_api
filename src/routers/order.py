@@ -6,7 +6,6 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..models.order import OrderModel
 from ..schemas.order.base_schemas import (OrderGetSchema,
                                           OrderPutSchema,
                                           OrderPostSchema)
@@ -25,7 +24,7 @@ class Order:
     db: Session = Depends(get_db)
 
     def __init__(self):
-        self.order_operation = OrderOperation(model=OrderModel, response_elem_name='order', db=self.db)
+        self.order_operation = OrderOperation(db=self.db)
 
     @router.get("/", response_model=list[OrderGetSchema], status_code=status.HTTP_200_OK)
     def get_all_orders(self,

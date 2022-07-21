@@ -4,7 +4,6 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..models.table import TableModel
 from ..schemas.table.base_schemas import (TableGetSchema,
                                           TablePutSchema,
                                           TablePostSchema)
@@ -23,9 +22,7 @@ class Table:
     db: Session = Depends(get_db)
 
     def __init__(self):
-        self.table_operation = TableOperation(model=TableModel,
-                                              response_elem_name='table',
-                                              db=self.db)
+        self.table_operation = TableOperation(db=self.db)
 
     @router.get("/", response_model=list[TableGetSchema], status_code=status.HTTP_200_OK)
     def get_all_tables(self,

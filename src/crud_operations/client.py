@@ -5,6 +5,10 @@ from ..models.client import ClientModel
 
 
 class ClientOperation(ModelOperation):
+    def __init__(self, db):
+        self.model = ClientModel
+        self.response_elem_name = 'client'
+        self.db = db
 
     def find_all_by_params(self, **kwargs) -> list[ClientModel]:
         phone = kwargs.get('phone')

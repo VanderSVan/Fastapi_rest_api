@@ -5,6 +5,10 @@ from ..models.schedule import ScheduleModel
 
 
 class ScheduleOperation(ModelOperation):
+    def __init__(self, db):
+        self.model = ScheduleModel
+        self.response_elem_name = 'schedule'
+        self.db = db
 
     def find_all_by_params(self, **kwargs) -> list[ScheduleModel]:
         day = kwargs.get('day').capitalize() if kwargs.get('day') else None

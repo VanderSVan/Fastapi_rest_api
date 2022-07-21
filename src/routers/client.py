@@ -4,7 +4,6 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..models.client import ClientModel
 from ..schemas.client.base_schemas import (ClientGetSchema,
                                            ClientPutSchema,
                                            ClientPostSchema)
@@ -23,9 +22,7 @@ class Client:
     db: Session = Depends(get_db)
 
     def __init__(self):
-        self.client_operation = ClientOperation(model=ClientModel,
-                                                response_elem_name='client',
-                                                db=self.db)
+        self.client_operation = ClientOperation(db=self.db)
 
     @router.get("/", response_model=list[ClientGetSchema], status_code=status.HTTP_200_OK)
     def get_all_clients(self, phone: str = Query(default=None,

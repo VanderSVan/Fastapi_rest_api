@@ -5,6 +5,10 @@ from ..models.order import OrderModel
 
 
 class OrderOperation(ModelOperation):
+    def __init__(self, db):
+        self.model = OrderModel
+        self.response_elem_name = 'order'
+        self.db = db
 
     def find_all_by_params(self, **kwargs) -> list[OrderModel]:
         start_datetime = kwargs.get('start_datetime')
