@@ -16,7 +16,9 @@ from src.crud_operations.order import OrderOperation
 from src.utils.dependencies import get_db
 from src.utils.responses.main import get_text
 
-router = InferringRouter(prefix='/orders', tags=['order'])
+# Unfortunately prefix in InferringRouter does not work correctly (duplicate prefix).
+# So I have a prefix in each function.
+router = InferringRouter(tags=['order'])
 
 
 @cbv(router)
@@ -26,7 +28,7 @@ class Order:
     def __init__(self):
         self.order_operation = OrderOperation(db=self.db)
 
-    @router.get("/", response_model=list[OrderGetSchema], status_code=status.HTTP_200_OK)
+    @router.get("/orders/", response_model=list[OrderGetSchema], status_code=status.HTTP_200_OK)
     def get_all_orders(self,
                        start_datetime: dt = Query(default=None,
                                                   description="YYYY-mm-ddTHH:MM:SS"),
@@ -45,11 +47,11 @@ class Order:
                                                        cost=cost,
                                                        client_id=client_id)
 
-    @router.get("/{order_id}", response_model=OrderGetSchema, status_code=status.HTTP_200_OK)
+    @router.get("/orders/{order_id}", response_model=OrderGetSchema, status_code=status.HTTP_200_OK)
     def get_order(self, order_id: int = Path(..., ge=1)):
         return self.order_operation.find_by_id_or_404(order_id)
 
-    @router.put("/{order_id}", response_model=OrderResponsePutSchema, status_code=status.HTTP_200_OK)
+    @router.put("/orders/{order_id}", response_model=OrderResponsePutSchema, status_code=status.HTTP_200_OK)
     def put_order(self, order: OrderPutSchema, order_id: int = Path(..., ge=1)):
         self.order_operation.update_model(order_id, order)
         return JSONResponse(status_code=status.HTTP_200_OK,
@@ -57,7 +59,7 @@ class Order:
                                 self.order_operation.response_elem_name, order_id
                             )})
 
-    @router.delete("/{order_id}", response_model=OrderResponseDeleteSchema, status_code=status.HTTP_200_OK)
+    @router.delete("/orders/{order_id}", response_model=OrderResponseDeleteSchema, status_code=status.HTTP_200_OK)
     def delete_order(self, order_id: int):
         self.order_operation.delete_model(order_id)
         return JSONResponse(status_code=status.HTTP_200_OK,
@@ -65,7 +67,7 @@ class Order:
                                 self.order_operation.response_elem_name, order_id
                             )})
 
-    @router.post("/create", response_model=OrderResponsePostSchema, status_code=status.HTTP_200_OK)
+    @router.post("/orders/create", response_model=OrderResponsePostSchema, status_code=status.HTTP_200_OK)
     def add_order(self, order: OrderPostSchema):
         order = self.order_operation.add_model(order)
         return JSONResponse(status_code=status.HTTP_201_CREATED,
