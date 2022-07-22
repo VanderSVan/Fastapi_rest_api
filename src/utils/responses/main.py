@@ -7,7 +7,7 @@ If language changes, set `responses.main.default_locale` and run `responses.main
 """
 import json
 from pathlib import Path
-# from ...logger.main import logger
+from ...logger.main import logger
 
 
 default_locale: str = "en"
@@ -19,12 +19,11 @@ json_file: Path = Path.joinpath(json_responses_dir, f"{default_locale}.json")
 
 
 def refresh_response_strings():
-    # logger.info("Refreshing response strings...")
-    print("Refreshing response strings...")
+    logger.info("Refreshing response strings...")
     global cached_strings
     with open(json_file) as f:
         cached_strings = json.load(f)
-    # logger.info("Refresh is done.")
+    logger.info("Refresh is done.")
 
 
 def get_text(name):
