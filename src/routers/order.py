@@ -1,4 +1,5 @@
-from datetime import datetime as dt
+from datetime import datetime as dt, date
+from typing import Literal
 
 from fastapi import Depends, Query, Path, status
 from fastapi.responses import JSONResponse
@@ -7,14 +8,14 @@ from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
 from ..schemas.order.base_schemas import (OrderGetSchema,
-                                          OrderPutSchema,
+                                          OrderPatchSchema,
                                           OrderPostSchema)
-from ..schemas.order.response_schemas import (OrderResponsePutSchema,
+from ..schemas.order.response_schemas import (OrderResponsePatchSchema,
                                               OrderResponseDeleteSchema,
                                               OrderResponsePostSchema)
-from src.crud_operations.order import OrderOperation
-from src.utils.dependencies import get_db
-from src.utils.responses.main import get_text
+from ..crud_operations.order import OrderOperation
+from ..utils.dependencies import get_db
+from ..utils.responses.main import get_text
 
 # Unfortunately prefix in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
@@ -30,12 +31,14 @@ class Order:
 
     @router.get("/orders/", response_model=list[OrderGetSchema], status_code=status.HTTP_200_OK)
     def get_all_orders(self,
-                       start_datetime: dt = Query(default=None,
-                                                  description="YYYY-mm-ddTHH:MM:SS"),
-                       end_datetime: dt = Query(default=None,
-                                                description="YYYY-mm-ddTHH:MM:SS"),
-                       is_approved: bool = Query(default=None,
-                                                 description="Order confirmation"),
+                       start_datetime: dt | date = Query(default=None,
+                                                         description="YYYY-mm-ddTHH:MM"),
+                       end_datetime: dt | date = Query(default=None,
+                                                       description="YYYY-mm-ddTHH:MM"),
+                       status: Literal['processing'] | Literal['confirmed'] = Query(
+                           default=None,
+                           description="'processing' or 'confirmed'"
+                       ),
                        cost: float = Query(default=None,
                                            description="Order cost"),
                        client_id: int = Query(default=None,
@@ -43,7 +46,7 @@ class Order:
                        ):
         return self.order_operation.find_all_by_params(start_datetime=start_datetime,
                                                        end_datetime=end_datetime,
-                                                       is_approved=is_approved,
+                                                       status=status,
                                                        cost=cost,
                                                        client_id=client_id)
 
@@ -51,11 +54,11 @@ class Order:
     def get_order(self, order_id: int = Path(..., ge=1)):
         return self.order_operation.find_by_id_or_404(order_id)
 
-    @router.put("/orders/{order_id}", response_model=OrderResponsePutSchema, status_code=status.HTTP_200_OK)
-    def put_order(self, order: OrderPutSchema, order_id: int = Path(..., ge=1)):
+    @router.patch("/orders/{order_id}", response_model=OrderResponsePatchSchema, status_code=status.HTTP_200_OK)
+    def patch_order(self, order: OrderPatchSchema, order_id: int = Path(..., ge=1)):
         self.order_operation.update_model(order_id, order)
         return JSONResponse(status_code=status.HTTP_200_OK,
-                            content={"message": get_text('put').format(
+                            content={"message": get_text('patch').format(
                                 self.order_operation.response_elem_name, order_id
                             )})
 

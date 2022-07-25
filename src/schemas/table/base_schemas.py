@@ -1,15 +1,15 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TableBaseSchema(BaseModel):
     type: Literal['standard'] | Literal['private'] | Literal["vip_room"]
-    number_of_seats: int
+    number_of_seats: int = Field(..., ge=1)
     price_per_hour: float
 
 
-class TablePutSchema(TableBaseSchema):
+class TablePatchSchema(TableBaseSchema):
     pass
 
 
@@ -22,7 +22,7 @@ class TablePostSchema(TableBaseSchema):
 
 
 class TableGetSchema(TableBaseSchema):
-    id: int
+    id: int = Field(..., ge=1)
 
     class Config:
         orm_mode = True

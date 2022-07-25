@@ -2,11 +2,13 @@ from sqlalchemy import and_
 
 from .base_crud_operations import ModelOperation
 from ..models.client import ClientModel
+from ..schemas.client.base_schemas import ClientPatchSchema
 
 
 class ClientOperation(ModelOperation):
     def __init__(self, db):
         self.model = ClientModel
+        self.patch_schema = ClientPatchSchema
         self.response_elem_name = 'client'
         self.db = db
 

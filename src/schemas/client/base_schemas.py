@@ -6,8 +6,9 @@ class ClientBaseSchema(BaseModel):
     phone: str = Field(..., min_length=9, max_length=15, regex=r'^([\d]+)$')
 
 
-class ClientPutSchema(ClientBaseSchema):
-    pass
+class ClientPatchSchema(ClientBaseSchema):
+    email: EmailStr | None
+    phone: str | None = Field(None, min_length=9, max_length=15, regex=r'^([\d]+)$')
 
 
 class ClientDeleteSchema(ClientBaseSchema):

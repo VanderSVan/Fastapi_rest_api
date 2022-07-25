@@ -7,13 +7,11 @@ from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
 from ..schemas.schedule.base_schemas import (ScheduleGetSchema,
-                                             SchedulePutSchema,
+                                             SchedulePatchSchema,
                                              SchedulePostSchema)
-from ..schemas.schedule.response_schemas import (
-    ScheduleResponsePutSchema,
-    ScheduleResponseDeleteSchema,
-    ScheduleResponsePostSchema
-)
+from ..schemas.schedule.response_schemas import (ScheduleResponsePatchSchema,
+                                                 ScheduleResponseDeleteSchema,
+                                                 ScheduleResponsePostSchema)
 
 from ..crud_operations.schedule import ScheduleOperation
 from ..utils.dependencies import get_db
@@ -53,15 +51,17 @@ class Schedule:
     def get_schedule(self, schedule_id: int = Path(..., ge=1)):
         return self.schedule_operation.find_by_id_or_404(schedule_id)
 
-    @router.put("/schedules/{schedule_id}", response_model=ScheduleResponsePutSchema, status_code=status.HTTP_200_OK)
-    def put_schedule(self, schedule: SchedulePutSchema, schedule_id: int = Path(..., ge=1)):
+    @router.patch("/schedules/{schedule_id}", response_model=ScheduleResponsePatchSchema,
+                  status_code=status.HTTP_200_OK)
+    def patch_schedule(self, schedule: SchedulePatchSchema, schedule_id: int = Path(..., ge=1)):
         self.schedule_operation.update_model(schedule_id, schedule)
         return JSONResponse(status_code=status.HTTP_200_OK,
-                            content={"message": get_text('put').format(
+                            content={"message": get_text('patch').format(
                                 self.schedule_operation.response_elem_name, schedule_id
                             )})
 
-    @router.delete("/schedules/{schedule_id}", response_model=ScheduleResponseDeleteSchema, status_code=status.HTTP_200_OK)
+    @router.delete("/schedules/{schedule_id}", response_model=ScheduleResponseDeleteSchema,
+                   status_code=status.HTTP_200_OK)
     def delete_schedule(self, schedule_id: int):
         self.schedule_operation.delete_model(schedule_id)
         return JSONResponse(status_code=status.HTTP_200_OK,

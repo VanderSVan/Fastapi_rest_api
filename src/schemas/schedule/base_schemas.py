@@ -1,5 +1,6 @@
 from typing import Literal
 from datetime import date, time
+from datetime import datetime as dt
 
 from pydantic import BaseModel, Field
 
@@ -14,13 +15,13 @@ class ScheduleBaseSchema(BaseModel):
           Literal['Sunday'] |
           date
           )
-    open_time: time = "08:00"
-    close_time: time = "17:00"
-    break_start_time: time = None
-    break_end_time: time = None
+    open_time: time = Field(dt.utcnow().strftime('%H:%M'))
+    close_time: time = Field(dt.utcnow().strftime('%H:%M'))
+    break_start_time: time | None = Field(dt.utcnow().strftime('%H:%M'))
+    break_end_time: time | None = Field(dt.utcnow().strftime('%H:%M'))
 
 
-class SchedulePutSchema(ScheduleBaseSchema):
+class SchedulePatchSchema(ScheduleBaseSchema):
     pass
 
 

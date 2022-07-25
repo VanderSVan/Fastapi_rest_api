@@ -1,28 +1,37 @@
-from datetime import datetime
+from datetime import datetime as dt
+from typing import Literal, Any
 
-from pydantic import BaseModel, validator
-from fastapi import Request
+from pydantic import BaseModel, Field, root_validator
+
+from ..table.base_schemas import TableGetSchema
+from ..validators.order import OrderBaseValidator, OrderPatchValidator, OrderPostValidator
 
 
 class OrderBaseSchema(BaseModel):
-    start_datetime: datetime
-    end_datetime: datetime
-    is_approved: bool = False
-    cost: float
-    Order_id: int
-    tables: list[int]
+    start_datetime: dt = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
+    end_datetime: dt = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
+    status: Literal['processing'] | Literal['confirmed']
+    client_id: int = Field(..., ge=1)
 
 
-# class OrderCreateSchema(OrderBaseSchema):
-# 
-#     @validator("tables")
-#     def check_tables(cls, tables):
-#         print("ZALUPA" if Request == 'POST' else Request.method)
-#         print("hebalse" if tables else "nihuebles")
-#         return "hebalse" if tables else "nihuebles"
+class OrderPatchSchema(OrderBaseSchema):
+    start_datetime: dt | None = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
+    end_datetime: dt | None = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
+    status: Literal['processing'] | Literal['confirmed'] | None
+    cost: float | None
+    client_id: int | None
+    add_tables: list[int] | None
+    delete_tables: list[int] | None
 
-class OrderPutSchema(OrderBaseSchema):
-    pass
+    @root_validator(pre=True)
+    def order_base_validate(cls, values):
+        validator = OrderBaseValidator(values)
+        return validator.validate_data()
+
+    @root_validator()
+    def order_post_validate(cls, values):
+        validator = OrderPatchValidator(values)
+        return validator.validate_data()
 
 
 class OrderDeleteSchema(OrderBaseSchema):
@@ -30,11 +39,23 @@ class OrderDeleteSchema(OrderBaseSchema):
 
 
 class OrderPostSchema(OrderBaseSchema):
-    pass
+    tables: list[int] = Field(..., ge=1)
+
+    @root_validator(pre=True)
+    def order_base_validate(cls, values):
+        validator = OrderBaseValidator(values)
+        return validator.validate_data()
+
+    @root_validator()
+    def order_post_validate(cls, values):
+        validator = OrderPostValidator(values)
+        return validator.validate_data()
 
 
 class OrderGetSchema(OrderBaseSchema):
     id: int
+    cost: Any
+    tables: list[TableGetSchema]
 
     class Config:
         orm_mode = True

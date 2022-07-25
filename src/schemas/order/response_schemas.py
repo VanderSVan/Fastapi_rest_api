@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from ...utils.responses.main import get_text
 
 
-class OrderResponsePutSchema(BaseModel):
-    message: str = get_text('put').format('order', 1)
+class OrderResponsePatchSchema(BaseModel):
+    message: str = get_text('patch').format('order', 1)
 
 
 class OrderResponseDeleteSchema(BaseModel):

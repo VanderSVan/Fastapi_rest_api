@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from ...utils.responses.main import get_text
 
 
-class ClientResponsePutSchema(BaseModel):
-    message: str = get_text('put').format('client', 1)
+class ClientResponsePatchSchema(BaseModel):
+    message: str = get_text('patch').format('client', 1)
 
 
 class ClientResponseDeleteSchema(BaseModel):

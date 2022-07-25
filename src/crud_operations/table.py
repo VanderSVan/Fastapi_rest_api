@@ -2,11 +2,13 @@ from sqlalchemy import and_
 
 from .base_crud_operations import ModelOperation
 from ..models.table import TableModel
+from ..schemas.table.base_schemas import TablePatchSchema
 
 
 class TableOperation(ModelOperation):
     def __init__(self, db):
         self.model = TableModel
+        self.patch_schema = TablePatchSchema
         self.response_elem_name = 'table'
         self.db = db
 

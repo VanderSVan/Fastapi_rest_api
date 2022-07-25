@@ -5,14 +5,14 @@ from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
 from ..schemas.table.base_schemas import (TableGetSchema,
-                                          TablePutSchema,
+                                          TablePatchSchema,
                                           TablePostSchema)
-from ..schemas.table.response_schemas import (TableResponsePutSchema,
+from ..schemas.table.response_schemas import (TableResponsePatchSchema,
                                               TableResponseDeleteSchema,
                                               TableResponsePostSchema)
-from src.crud_operations.table import TableOperation
-from src.utils.dependencies import get_db
-from src.utils.responses.main import get_text
+from ..crud_operations.table import TableOperation
+from ..utils.dependencies import get_db
+from ..utils.responses.main import get_text
 
 # Unfortunately prefix in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
@@ -42,11 +42,11 @@ class Table:
     def get_table(self, table_id: int = Path(..., ge=1)):
         return self.table_operation.find_by_id_or_404(table_id)
 
-    @router.put("/tables/{table_id}", response_model=TableResponsePutSchema, status_code=status.HTTP_200_OK)
-    def put_table(self, table: TablePutSchema, table_id: int = Path(..., ge=1)):
+    @router.patch("/tables/{table_id}", response_model=TableResponsePatchSchema, status_code=status.HTTP_200_OK)
+    def patch_table(self, table: TablePatchSchema, table_id: int = Path(..., ge=1)):
         self.table_operation.update_model(table_id, table)
         return JSONResponse(status_code=status.HTTP_200_OK,
-                            content={"message": get_text('put').format(
+                            content={"message": get_text('patch').format(
                                 self.table_operation.response_elem_name, table_id
                             )})
 

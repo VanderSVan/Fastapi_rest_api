@@ -1,18 +1,18 @@
 from fastapi import Depends, Query, Path, status
 from fastapi.responses import JSONResponse
-from fastapi_utils.cbv import cbv, _update_cbv_route_endpoint_signature
+from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
 from ..schemas.client.base_schemas import (ClientGetSchema,
-                                           ClientPutSchema,
+                                           ClientPatchSchema,
                                            ClientPostSchema)
-from ..schemas.client.response_schemas import (ClientResponsePutSchema,
+from ..schemas.client.response_schemas import (ClientResponsePatchSchema,
                                                ClientResponseDeleteSchema,
                                                ClientResponsePostSchema)
-from src.crud_operations.client import ClientOperation
-from src.utils.dependencies import get_db
-from src.utils.responses.main import get_text
+from ..crud_operations.client import ClientOperation
+from ..utils.dependencies import get_db
+from ..utils.responses.main import get_text
 
 # Unfortunately prefix in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
@@ -22,7 +22,6 @@ router = InferringRouter(tags=['client'])
 @cbv(router)
 class Client:
     db: Session = Depends(get_db)
-    prefix: str = '/clients'
 
     def __init__(self):
         self.client_operation = ClientOperation(db=self.db)
@@ -36,11 +35,11 @@ class Client:
     def get_client(self, client_id: int = Path(..., ge=1)):
         return self.client_operation.find_by_id_or_404(client_id)
 
-    @router.put("/clients/{client_id}", response_model=ClientResponsePutSchema, status_code=status.HTTP_200_OK)
-    def put_client(self, client: ClientPutSchema, client_id: int = Path(..., ge=1)):
+    @router.patch("/clients/{client_id}", response_model=ClientResponsePatchSchema, status_code=status.HTTP_200_OK)
+    def patch_client(self, client: ClientPatchSchema, client_id: int = Path(..., ge=1)):
         self.client_operation.update_model(client_id, client)
         return JSONResponse(status_code=status.HTTP_200_OK,
-                            content={"message": get_text('put').format(
+                            content={"message": get_text('patch').format(
                                 self.client_operation.response_elem_name, client_id
                             )})
 

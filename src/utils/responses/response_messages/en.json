@@ -1,7 +1,8 @@
 {
   "post": "{} id={} was successfully created",
-  "put": "{} id={} was successfully updated",
+  "patch": "{} id={} was successfully updated",
   "delete": "{} id={} was successfully deleted",
   "not_found": "{} id={} not found",
-  "exists": "{} id={} already exists"
+  "exists": "{} id={} already exists",
+  "err_patch": "only '{}' and '{}' fields are available in the 'PATCH' method, but was given '{}' field"
 }

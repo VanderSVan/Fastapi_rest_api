@@ -14,6 +14,7 @@ from ..utils.responses.main import get_text
 @dataclass
 class ModelOperation:
     model: BaseModel
+    patch_schema: type(BaseSchema)
     response_elem_name: str
     db: Session
 
@@ -36,29 +37,35 @@ class ModelOperation:
             query = 0
         return query
 
-    def update_model(self,
-                     id_: int,
-                     new_schema: BaseSchema,
-                     ) -> BaseModel:
-
+    def update_model(self, id_: int, new_schema: BaseSchema) -> BaseModel:
+        # get data from db or raise 404 exception
         old_model: BaseModel = self.find_by_id_or_404(id_)
-        for key, value in new_schema:
+
+        # transform db model to schema
+        old_data: BaseSchema = self.patch_schema(**old_model.__dict__)
+
+        # update schema
+        data_to_update: dict = new_schema.dict(exclude_unset=True)
+        updated_data: BaseSchema = old_data.copy(update=data_to_update)
+
+        # update db model
+        for key, value in updated_data:
             if hasattr(old_model, key):
                 setattr(old_model, key, value)
-        updated_model = old_model
+        updated_model: BaseModel = old_model
+
         self.db.commit()
         self.db.refresh(updated_model)
         return updated_model
 
     def delete_model(self, id_: int) -> NoReturn:
-
         model_to_delete = self.find_by_id_or_404(id_)
         self.db.delete(model_to_delete)
         self.db.commit()
 
-    def add_model(self, schema: BaseSchema) -> BaseModel:
+    def add_model(self, new_schema: BaseSchema) -> BaseModel:
         max_model_id: int = self.get_max_model_id()
-        new_model = self.model(id=max_model_id + 1, **schema.dict())
+        new_model = self.model(id=max_model_id + 1, **new_schema.dict())
         self.db.add(new_model)
         self.db.commit()
         self.db.refresh(new_model)
