@@ -21,7 +21,7 @@ class TableOperation(ModelOperation):
                 .filter(and_(
                              (TableModel.type == type
                               if type is not None else True),
-                             (TableModel.number_of_seats >= number_of_seats
+                             (TableModel.number_of_seats <= number_of_seats
                               if number_of_seats is not None else True),
                              (TableModel.price_per_hour <= price_per_hour
                               if price_per_hour is not None else True)

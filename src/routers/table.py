@@ -31,7 +31,7 @@ class Table:
                        type: str = Query(default=None,
                                          description="Table type"),
                        number_of_seats: int = Query(default=None,
-                                                    description="More or equal"),
+                                                    description="Less or equal"),
                        price_per_hour: float = Query(default=None,
                                                      description="Less or equal")):
         return self.table_operation.find_all_by_params(type=type,

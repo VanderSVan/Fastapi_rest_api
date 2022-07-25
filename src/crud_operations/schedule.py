@@ -29,13 +29,13 @@ class ScheduleOperation(ModelOperation):
                     .filter(and_(
                                  (ScheduleModel.day == day
                                   if day is not None else True),
-                                 (ScheduleModel.open_time <= open_time
+                                 (ScheduleModel.open_time >= open_time
                                   if open_time is not None else True),
-                                 (ScheduleModel.close_time <= close_time
+                                 (ScheduleModel.close_time >= close_time
                                   if close_time is not None else True),
-                                 (ScheduleModel.break_start_time <= break_start_time
+                                 (ScheduleModel.break_start_time >= break_start_time
                                   if break_start_time is not None else True),
-                                 (ScheduleModel.break_end_time <= break_end_time
+                                 (ScheduleModel.break_end_time >= break_end_time
                                   if break_end_time is not None else True)
                                 )
                             )

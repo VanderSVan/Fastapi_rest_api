@@ -33,18 +33,18 @@ class OrderOperation(ModelOperation):
         return (self.db
                 .query(OrderModel)
                 .filter(and_(
-            (OrderModel.start_datetime >= start_datetime
-             if start_datetime is not None else True),
-            (OrderModel.end_datetime >= end_datetime
-             if end_datetime is not None else True),
-            (OrderModel.status <= status_
-             if status_ is not None else True),
-            (OrderModel.cost == cost
-             if cost is not None else True),
-            (OrderModel.client_id == client_id
-             if client_id is not None else True)
-        )
-        )
+                             (OrderModel.start_datetime >= start_datetime
+                              if start_datetime is not None else True),
+                             (OrderModel.end_datetime >= end_datetime
+                              if end_datetime is not None else True),
+                             (OrderModel.status == status_
+                              if status_ is not None else True),
+                             (OrderModel.cost <= cost
+                              if cost is not None else True),
+                             (OrderModel.client_id == client_id
+                              if client_id is not None else True)
+                        )
+                        )
                 .all())
 
     def update_model(self, id_: int, new_data: OrderPatchSchema) -> OrderModel:
