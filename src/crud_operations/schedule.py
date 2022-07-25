@@ -19,7 +19,6 @@ class ScheduleOperation(ModelOperation):
         _week_day = kwargs.get('day').capitalize() if isinstance(kwargs.get('day'), str) else None
 
         day = _date if _date else _week_day
-        # print("ALOOOOOO", day, type(day))
         open_time = kwargs.get('open_time')
         close_time = kwargs.get('close_time')
         break_start_time = kwargs.get('break_start_time')
