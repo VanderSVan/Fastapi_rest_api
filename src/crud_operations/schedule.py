@@ -4,7 +4,7 @@ from sqlalchemy import and_
 
 from .base_crud_operations import ModelOperation
 from ..models.schedule import ScheduleModel
-from ..schemas.schedule.base_schemas import SchedulePatchSchema
+from ..schemes.schedule.base_schemes import SchedulePatchSchema
 
 
 class ScheduleOperation(ModelOperation):

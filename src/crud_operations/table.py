@@ -2,7 +2,7 @@ from sqlalchemy import and_
 
 from .base_crud_operations import ModelOperation
 from ..models.table import TableModel
-from ..schemas.table.base_schemas import TablePatchSchema
+from ..schemes.table.base_schemes import TablePatchSchema
 
 
 class TableOperation(ModelOperation):

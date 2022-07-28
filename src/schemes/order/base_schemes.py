@@ -3,7 +3,7 @@ from typing import Literal, Any
 
 from pydantic import BaseModel, Field, root_validator
 
-from ..table.base_schemas import TableGetSchema
+from ..table.base_schemes import TableGetSchema
 from ..validators.order import OrderBaseValidator, OrderPatchValidator, OrderPostValidator
 
 
@@ -11,7 +11,7 @@ class OrderBaseSchema(BaseModel):
     start_datetime: dt = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
     end_datetime: dt = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
     status: Literal['processing'] | Literal['confirmed']
-    client_id: int = Field(..., ge=1)
+    user_id: int = Field(..., ge=1)
 
 
 class OrderPatchSchema(OrderBaseSchema):
@@ -19,7 +19,7 @@ class OrderPatchSchema(OrderBaseSchema):
     end_datetime: dt | None = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
     status: Literal['processing'] | Literal['confirmed'] | None
     cost: float | None
-    client_id: int | None
+    user_id: int | None
     add_tables: list[int] | None
     delete_tables: list[int] | None
 

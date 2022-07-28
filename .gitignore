@@ -2,3 +2,4 @@
 /src/.env
 /gg.py
 /src/logger/logs/
+/.pytest_cache/

@@ -10,7 +10,9 @@ class TableBaseSchema(BaseModel):
 
 
 class TablePatchSchema(TableBaseSchema):
-    pass
+    type: Literal['standard'] | Literal['private'] | Literal["vip_room"] | None
+    number_of_seats: int | None = Field(None, ge=1)
+    price_per_hour: float | None
 
 
 class TableDeleteSchema(TableBaseSchema):

@@ -1,8 +1,15 @@
 {
-  "post": "{} id={} was successfully created",
-  "patch": "{} id={} was successfully updated",
-  "delete": "{} id={} was successfully deleted",
-  "not_found": "{} id={} not found",
+  "post": "{} with id={} was successfully created",
+  "patch": "{} with id={} was successfully updated",
+  "delete": "{} with id={} was successfully deleted",
+  "not_found": "{} with id={} not found",
+  "param_not_found": "{} with {}={} not found",
   "exists": "{} id={} already exists",
-  "err_patch": "only '{}' and '{}' fields are available in the 'PATCH' method, but was given '{}' field"
+  "err_patch": "Only '{}' and '{}' fields are available in the 'PATCH' method, but was given '{}' field",
+  "err_500": "Server side error",
+
+  "email_confirmed": "E-mail has been successfully confirmed",
+  "email_already_confirmed": "User = '{}' has already confirmed their e-mail address",
+
+  "decode_signature_fail": "Failed decrypting user data. Error = {}"
 }

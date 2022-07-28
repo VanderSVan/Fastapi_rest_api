@@ -15,6 +15,10 @@ uvicorn = "^0.18.2"
 pydantic = {extras = ["email"], version = "^1.9.1"}
 alembic = "^1.8.1"
 DateTimeRange = "^1.2.0"
+blake2signer = "^2.5.0"
+fastapi-mail = "^1.1.4"
+passlib = "^1.7.4"
+bcrypt = "^3.2.2"
 
 [tool.poetry.dev-dependencies]
 

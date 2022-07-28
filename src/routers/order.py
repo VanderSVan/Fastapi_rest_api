@@ -7,17 +7,17 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..schemas.order.base_schemas import (OrderGetSchema,
+from ..schemes.order.base_schemes import (OrderGetSchema,
                                           OrderPatchSchema,
                                           OrderPostSchema)
-from ..schemas.order.response_schemas import (OrderResponsePatchSchema,
+from ..schemes.order.response_schemes import (OrderResponsePatchSchema,
                                               OrderResponseDeleteSchema,
                                               OrderResponsePostSchema)
 from ..crud_operations.order import OrderOperation
 from ..utils.dependencies import get_db
 from ..utils.responses.main import get_text
 
-# Unfortunately prefix in InferringRouter does not work correctly (duplicate prefix).
+# Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
 router = InferringRouter(tags=['order'])
 

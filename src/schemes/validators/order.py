@@ -38,10 +38,10 @@ class OrderBaseValidator:
                 if self._convert_start_end_to_dt_format(start, end, dt_format):
                     return True
 
-        raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                            message="Unsupported datetime format, should be '%Y-%m-%dT%H:%M' "
-                                    "for 'get', 'put' or 'post' operations or "
-                                    "'%Y-%m-%d' for 'get' operation only")
+            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
+                                message="Unsupported datetime format, should be '%Y-%m-%dT%H:%M' "
+                                        "for 'get', 'put' or 'post' operations or "
+                                        "'%Y-%m-%d' for 'get' operation only")
 
     @staticmethod
     def _convert_start_end_to_dt_format(start: str | dt,

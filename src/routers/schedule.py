@@ -6,10 +6,10 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..schemas.schedule.base_schemas import (ScheduleGetSchema,
+from ..schemes.schedule.base_schemes import (ScheduleGetSchema,
                                              SchedulePatchSchema,
                                              SchedulePostSchema)
-from ..schemas.schedule.response_schemas import (ScheduleResponsePatchSchema,
+from ..schemes.schedule.response_schemes import (ScheduleResponsePatchSchema,
                                                  ScheduleResponseDeleteSchema,
                                                  ScheduleResponsePostSchema)
 
@@ -17,7 +17,7 @@ from ..crud_operations.schedule import ScheduleOperation
 from ..utils.dependencies import get_db
 from ..utils.responses.main import get_text
 
-# Unfortunately prefix in InferringRouter does not work correctly (duplicate prefix).
+# Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
 router = InferringRouter(tags=['schedule'])
 

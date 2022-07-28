@@ -1,16 +1,12 @@
 from datetime import datetime as dt
-from datetime import timedelta as td
-from math import ceil
 
 from fastapi import status
-from pydantic import BaseModel as BaseSchema
 from sqlalchemy import and_
 from datetimerange import DateTimeRange
 
-from ..db.db_sqlalchemy import SessionLocal
 from ..models.order import OrderModel
 from ..models.table import TableModel
-from ..schemas.order.base_schemas import OrderPatchSchema, OrderPostSchema
+from ..schemes.order.base_schemes import OrderPatchSchema, OrderPostSchema
 from ..utils.exceptions import JSONException
 from ..utils.responses.main import get_text
 from .base_crud_operations import ModelOperation
@@ -43,34 +39,41 @@ class OrderOperation(ModelOperation):
                               if cost is not None else True),
                              (OrderModel.client_id == client_id
                               if client_id is not None else True)
-                        )
+                            )
                         )
                 .all())
 
     def update_model(self, id_: int, new_data: OrderPatchSchema) -> OrderModel:
-        # get order model from db or raise 404 exception
+        # Get order model from db or raise 404 exception.
         old_model_without_tables: OrderModel = self.find_by_id_or_404(id_)
 
+        # Check free time in order list.
         if not self._check_free_time_in_orders(new_data.start_datetime, new_data.end_datetime):
-            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="This time is already taken")
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="This time is already taken"
+            )
 
-        # get nested tables
+        # Get nested tables.
         existing_tables: list[TableModel] = old_model_without_tables.tables
         existing_table_ids: list[int] = [table_obj.id for table_obj in existing_tables]
 
-        # transform order model to order schema
-        old_data_without_tables: BaseSchema = self.patch_schema(**old_model_without_tables.__dict__)
+        # Transform order model to order schema.
+        old_data_without_tables: OrderPatchSchema = self.patch_schema(
+            **old_model_without_tables.__dict__
+        )
 
-        # update order schema by new_data
+        # Update order schema by new_data.
         data_to_update: dict = new_data.dict(exclude_unset=True)
-        updated_data: BaseSchema = old_data_without_tables.copy(update=data_to_update)
+        updated_data: OrderPatchSchema = old_data_without_tables.copy(update=data_to_update)
 
-        # update order model
+        # Update order model.
         for key, value in updated_data:
             if key == 'tables':
-                raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    message=get_text('err_patch').format('add_tables', 'delete_tables', 'tables'))
+                raise JSONException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message=get_text('err_patch').format('add_tables', 'delete_tables', 'tables')
+                )
 
             if key == 'add_tables' and value:
                 new_tables: list[TableModel] = self._collect_new_tables(value, existing_table_ids)
@@ -84,7 +87,7 @@ class OrderOperation(ModelOperation):
             if hasattr(old_model_without_tables, key):
                 setattr(old_model_without_tables, key, value)
 
-        # save updated model
+        # Save updated model.
         updated_model: OrderModel = old_model_without_tables
         self.db.commit()
         self.db.refresh(updated_model)
@@ -96,23 +99,22 @@ class OrderOperation(ModelOperation):
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
                                 message="This time is already taken")
 
-        max_model_id: int = self.get_max_model_id()
+        max_model_id: int = self.get_max_id()
         new_model = self.model(id=max_model_id + 1, **new_data.dict())
         self.db.add(new_model)
         self.db.commit()
         self.db.refresh(new_model)
         return new_model
 
-    @staticmethod
-    def _collect_new_tables(tables: list[TableModel], existing_table_ids: list[int]) -> list[TableModel]:
-        db = SessionLocal()
-        try:
-            table_operation = TableOperation(db)
-            return [table_operation.find_by_id_or_404(table_id)
-                    for table_id in tables
-                    if table_id not in existing_table_ids]
-        finally:
-            db.close()
+    def _collect_new_tables(self,
+                            tables: list[TableModel],
+                            existing_table_ids: list[int]
+                            ) -> list[TableModel]:
+
+        table_operation = TableOperation(self.db)
+        return [table_operation.find_by_id_or_404(table_id)
+                for table_id in tables
+                if table_id not in existing_table_ids]
 
     def _check_free_time_in_orders(self, start: dt, end: dt) -> bool:
         """Returns True if time is free else False"""

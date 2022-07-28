@@ -11,10 +11,10 @@ class OrderModel(BaseModel):
     id = Column(Integer, primary_key=True)
     start_datetime = Column(DateTime)
     end_datetime = Column(DateTime)
-    status = Column(String(length=100))
+    status = Column(String(length=25))
     cost = Column(Float(precision=2))
 
-    client_id = Column(Integer, ForeignKey('clients.id', onupdate='CASCADE', ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
     tables = relationship('TableModel', secondary=orders_tables, back_populates='orders')
 
 

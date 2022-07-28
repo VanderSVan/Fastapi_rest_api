@@ -13,7 +13,7 @@ sys.path.append(str(project_dir))
 
 from src.db.db_sqlalchemy import BaseModel
 from src.config import Settings
-from src.models.client import ClientModel
+from src.models.user import UserModel
 from src.models.order import OrderModel
 from src.models.table import TableModel
 from src.models.relationships import orders_tables
