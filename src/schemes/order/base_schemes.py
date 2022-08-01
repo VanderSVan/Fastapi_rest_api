@@ -3,7 +3,6 @@ from typing import Literal, Any
 
 from pydantic import BaseModel, Field, root_validator
 
-from ..table.base_schemes import TableGetSchema
 from ..validators.order import OrderBaseValidator, OrderPatchValidator, OrderPostValidator
 
 
@@ -55,7 +54,6 @@ class OrderPostSchema(OrderBaseSchema):
 class OrderGetSchema(OrderBaseSchema):
     id: int
     cost: Any
-    tables: list[TableGetSchema]
 
     class Config:
         orm_mode = True

@@ -7,8 +7,8 @@ PASSWORD_CONTEXT = CryptContext(schemes='bcrypt')
 class PasswordCryptographer:
     """Encrypts and decrypts password"""
 
-    @staticmethod
-    def bcrypt(password: str) -> str:
+    @classmethod
+    def bcrypt(cls, password: str) -> str:
         """
         Encrypts password.
         :param password: User password.
@@ -17,18 +17,17 @@ class PasswordCryptographer:
 
         return PASSWORD_CONTEXT.hash(password)
 
-    @staticmethod
-    def verify(hashed_password: str, input_password: str) -> bool:
+    @classmethod
+    def verify(cls, plain_password: str, hashed_password: str) -> bool:
         """
         Decrypts and checks the user’s password.
+        :param plain_password: The password entered by the user.
         :param hashed_password: User password from the db.
-        :param input_password: The password entered by the user.
         :return: bool
         """
-
         try:
             result = PASSWORD_CONTEXT.verify(
-                input_password,
+                plain_password,
                 hashed_password,
             )
         except UnknownHashError:

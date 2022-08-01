@@ -9,7 +9,10 @@
   "err_500": "Server side error",
 
   "email_confirmed": "E-mail has been successfully confirmed",
+  "email_not_confirmed": "First confirm your email address",
   "email_already_confirmed": "User = '{}' has already confirmed their e-mail address",
+  "authenticate_failed": "login or password is not correct",
+  "forbidden_request": "Access is denied",
 
   "decode_signature_fail": "Failed decrypting user data. Error = {}"
 }
