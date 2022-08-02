@@ -1,9 +1,14 @@
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import (BaseModel as BaseSchema,
+                      EmailStr,
+                      Field,
+                      root_validator)
+
+from src.schemes.validators.user import UserPasswordValidator
 
 
-class UserBaseSchema(BaseModel):
+class UserBaseSchema(BaseSchema):
     username: str = Field(..., min_length=5, max_length=100)
     email: EmailStr
     phone: str = Field(..., min_length=9, max_length=15, regex=r'^([\d]+)$')
@@ -23,7 +28,7 @@ class UserDeleteSchema(UserBaseSchema):
 
 
 class UserPostSchema(UserBaseSchema):
-    password: str = Field(..., min_length=10, max_length=100)
+    password: str = Field(..., min_length=8, max_length=30)
 
 
 class UserGetSchema(UserBaseSchema):
@@ -32,3 +37,25 @@ class UserGetSchema(UserBaseSchema):
 
     class Config:
         orm_mode = True
+
+
+class UserResetPasswordSchema(BaseSchema):
+    password: str = Field(
+        ...,
+        title='Password',
+        min_length=8,
+        max_length=30,
+    )
+    password_confirm: str = Field(
+        ...,
+        title='Repeat your password',
+        min_length=8,
+        max_length=30,
+    )
+
+    @root_validator()
+    def user_password_validate(cls, values):
+        validator = UserPasswordValidator(values)
+        return validator.validate_data()
+
+

@@ -2,23 +2,16 @@ from typing import NoReturn
 from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
 
-from .base_crud_operations import ModelOperation
-from ..models.user import UserModel
-from ..schemes.user.base_schemes import UserPatchSchema
-from ..utils.exceptions import JSONException
-from ..utils.responses.main import get_text
-from ..utils.auth_utils.password_cryptograph import PasswordCryptographer
+from src.models.user import UserModel
+from src.crud_operations.user import UserOperation
+from src.utils.exceptions import JSONException
+from src.utils.responses.main import get_text
+from src.utils.auth_utils.password_cryptograph import PasswordCryptographer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-class UserAuthOperation(ModelOperation):
-    def __init__(self, db):
-        self.model = UserModel
-        self.patch_schema = UserPatchSchema
-        self.response_elem_name = 'user_auth'
-        self.db = db
-
+class UserAuthOperation(UserOperation):
     def authenticate_user(self, username: str, password: str) -> UserModel:
         user = self.find_by_param_or_404('username', username)
         if not PasswordCryptographer.verify(password, user.hashed_password):
@@ -40,13 +33,25 @@ class UserAuthOperation(ModelOperation):
         user_obj.status = 'confirmed'
         updated_user_obj = user_obj
 
-        # Save new model data.
+        # Save new user data.
         self.db.commit()
         self.db.refresh(updated_user_obj)
+
         return updated_user_obj
 
-    def reset_password(self, username: str) -> UserModel:
-        pass
+    def confirm_reset_password(self, username: str, new_password):
+        # Get user object from db.
+        user_obj: UserModel = self.find_by_param_or_404('username', username)
+
+        # Update user password.
+        user_obj.hashed_password = PasswordCryptographer.bcrypt(new_password)
+        updated_user_obj = user_obj
+
+        # Save new user data.
+        self.db.commit()
+        self.db.refresh(updated_user_obj)
+
+        return updated_user_obj
 
     @staticmethod
     def _check_user_status(user) -> NoReturn:

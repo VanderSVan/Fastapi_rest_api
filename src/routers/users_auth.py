@@ -1,6 +1,7 @@
 from datetime import timedelta as td
+from typing import NoReturn
 
-from fastapi import Depends, Query, Path, BackgroundTasks, status
+from fastapi import Depends, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_utils.cbv import cbv
@@ -10,10 +11,11 @@ from sqlalchemy.orm import Session
 from ..models.user import UserModel
 from ..schemes.user.base_schemes import (UserGetSchema,
                                          UserPatchSchema,
-                                         UserPostSchema)
-from ..schemes.user.response_schemes import (UserResponsePatchSchema,
-                                             UserResponseDeleteSchema,
-                                             UserResponsePostSchema)
+                                         UserPostSchema,
+                                         UserResetPasswordSchema)
+from ..schemes.user.response_schemes import (UserResponseConfirmEmailSchema,
+                                             UserResponseResetPasswordSchema,
+                                             UserResponseConfirmResetPasswordSchema)
 from ..schemes.jwt.response_schemes import Token
 
 from ..crud_operations.user import UserOperation
@@ -23,7 +25,7 @@ from ..utils.responses.main import get_text
 from ..utils.auth_utils.signature import Signer
 from ..utils.auth_utils.jwt import JWT
 from ..config import Settings
-from ..services.email.main import send_confirm_email
+from ..services.email.main import compose_email_with_action_link
 from ..crud_operations.user_auth import UserAuthOperation
 
 # Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
@@ -38,35 +40,72 @@ class UserAuth:
     def __init__(self):
         self.user_operation = UserAuthOperation(db=self.db)
 
-    ###############################################################
-    @router.post("/users/auth/register",
-                 response_model=UserGetSchema,
-                 status_code=status.HTTP_201_CREATED)
-    def register_user(self,
-                      user: UserPostSchema,
-                      background_tasks: BackgroundTasks
-                      ) -> UserModel:
-        # 1. Add new user into db.
-        new_user_obj: UserModel = self.user_operation.add_obj(user)
+    @router.get('/users/auth/me/', response_model=UserGetSchema)
+    def get_current_user(self,
+                         current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
+                         ) -> UserModel:
+        """
+        Returns current user data.
+        :param current_confirmed_user:
+        """
+        return current_confirmed_user
 
-        # 2. Encode the username and pasting it into the url
-        encoded_user_data: str = Signer.sign_object({'username': user.username})
-        url_confirming_page: str = Settings.CONFIRM_EMAIL_URL.format(encoded_user_data)
+    @router.get('/users/auth/confirm-email/{sign}/', response_model=UserResponseConfirmEmailSchema)
+    def confirm_email(self, sign: str):
+        """
+        Request to confirm the user’s email.
+        :param sign: it is encoded user data, such as a username.
+        """
+        decoded_user_data: dict = Signer.unsign_object(obj=sign)
+        username: str = decoded_user_data.get('username')
+        self.user_operation.confirm_user_email(username)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": get_text('email_confirmed')}
+        )
 
-        # 3. Composing a letter to send. Letter to confirm registration.
-        email, params = send_confirm_email(email=user.email, url=url_confirming_page)
+    @router.get('/users/auth/reset-password/', response_model=UserResponseResetPasswordSchema)
+    def reset_password(self,
+                       background_tasks: BackgroundTasks,
+                       current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
+                       ):
+        """
+        Request to reset the user’s password.
+        The user must be in authenticated status else he cannot access this endpoint.
+        It then sends an email to the user to reset the password.
+        :param background_tasks: task that runs in the background.
+        :param current_confirmed_user: user data.
+        """
+        # 1. Find user into db
+        user: UserModel = self.user_operation.find_by_id_or_404(current_confirmed_user.id)
+
+        # 2. Compose email with action link
+        email, params = compose_email_with_action_link(username=user.username,
+                                                       email=user.email,
+                                                       action='reset_password',
+                                                       prefix_link=Settings.RESET_PASSWORD_URL
+                                                       )
         message, template_name = params
 
-        # 4. Start sending letter to email with background task.
+        # 3. Start sending letter to email with background task.
         background_tasks.add_task(email.send_message,
                                   message=message,
                                   template_name=template_name,
                                   )
-        return new_user_obj
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": get_text('reset_password')}
+        )
 
-    ###############################################################
     @router.post("/token", response_model=Token, summary='User registration')
-    def login_to_access_token(self, form_data: OAuth2PasswordRequestForm = Depends()):
+    def create_token(self,
+                     form_data: OAuth2PasswordRequestForm = Depends()
+                     ) -> dict:
+        """
+        Gets authenticated data and returns a token if the data is valid.
+        :param form_data: input data such as login and password.
+        :return: {'access_token': str, 'token_type': 'bearer'}
+        """
         user = self.user_operation.authenticate_user(form_data.username, form_data.password)
         access_token_expires = td(minutes=Settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = JWT.create_access_token(
@@ -74,27 +113,54 @@ class UserAuth:
         )
         return {"access_token": access_token, "token_type": "bearer"}
 
-    ###############################################################
-    @router.get('/users/auth/me/')
-    def get_current_user(self,
-                         current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
-                         ):
-        return current_confirmed_user
+    @router.post("/users/auth/register",
+                 response_model=UserGetSchema,
+                 status_code=status.HTTP_201_CREATED)
+    def register_user(self,
+                      user: UserPostSchema,
+                      background_tasks: BackgroundTasks
+                      ) -> UserModel:
+        """
+        Gets new user data and saves it into db.
+        It then sends an email to the user to confirm the password.
+        :param user: user data.
+        :param background_tasks: task that runs in the background.
+        :return: UserModel.
+        """
+        # 1. Add new user into db.
+        new_user_obj: UserModel = self.user_operation.add_obj(user)
 
-    ###############################################################
-    @router.get('/users/auth/confirm-email/{sign}/')
-    def confirm_email(self, sign: str):
-        """Bla"""
+        # 2. Compose email with action link
+        email, params = compose_email_with_action_link(username=user.username,
+                                                       email=user.email,
+                                                       action='confirm_email',
+                                                       prefix_link=Settings.CONFIRM_EMAIL_URL
+                                                       )
+        message, template_name = params
+
+        # 3. Start sending letter to email with background task.
+        background_tasks.add_task(email.send_message,
+                                  message=message,
+                                  template_name=template_name,
+                                  )
+        return new_user_obj
+
+    @router.post('/users/auth/confirm-reset-password/{sign}/',
+                 response_model=UserResponseConfirmResetPasswordSchema)
+    def confirm_reset_password(self,
+                               sign: str,
+                               new_password_data: UserResetPasswordSchema):
+        """
+        Gets the user's new password and saves it in the database.
+        :param sign: it is encoded user data, such as a username.
+        :param new_password_data: new password
+        :return: JSONResponse
+        """
+
         decoded_user_data: dict = Signer.unsign_object(obj=sign)
         username: str = decoded_user_data.get('username')
-        self.user_operation.confirm_user_email(username)
-        return JSONResponse(status_code=status.HTTP_200_OK,
-                            content={"message": get_text('email_confirmed')})
-
-    ###############################################################
-    @router.get('/users/auth/{username}/reset-password/')
-    def reset_password(self,
-                       username: str,
-                       current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
-                       ):
-        pass
+        self.user_operation.confirm_reset_password(username, new_password_data.password)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": get_text('changed_password')}
+        )

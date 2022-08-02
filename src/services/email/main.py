@@ -1,5 +1,7 @@
 from pathlib import Path
+from typing import NoReturn, Literal
 
+from fastapi import status, BackgroundTasks
 from fastapi_mail import (
     FastMail,
     MessageSchema,
@@ -8,6 +10,10 @@ from fastapi_mail import (
 
 from src.config import Settings
 from src.services.email.utils import create_expire
+from src.utils.auth_utils.signature import Signer
+from src.utils.logger.main import logger
+from src.utils.exceptions import JSONException
+from src.utils.responses.main import get_text
 
 email_config = ConnectionConfig(
     MAIL_USERNAME=Settings.MAIL_USERNAME,
@@ -24,9 +30,9 @@ email_config = ConnectionConfig(
 )
 
 
-def send_confirm_email(email: str,
-                       url: str
-                       ) -> tuple[FastMail, list[MessageSchema, str]]:
+def compose_confirm_email(email: str,
+                          url: str
+                          ) -> tuple[FastMail, list[MessageSchema, str]]:
     """
     Composing a letter to send. Letter to confirm registration.
     :param email: User email.
@@ -56,9 +62,9 @@ def send_confirm_email(email: str,
     return fm, params
 
 
-def send_reset_password_email(email: str,
-                              url: str
-                              ) -> tuple[FastMail, list[MessageSchema, str]]:
+def compose_reset_password_email(email: str,
+                                 url: str
+                                 ) -> tuple[FastMail, list[MessageSchema, str]]:
     """
     Composing a letter to send. Letter to reset user password.
     :param email: User email.
@@ -87,3 +93,32 @@ def send_reset_password_email(email: str,
     fm = FastMail(email_config)
     params = [message, template_name]
     return fm, params
+
+
+def compose_email_with_action_link(
+        username: str,
+        email: str,
+        action: Literal['confirm_email'] | Literal['reset_password'],
+        prefix_link: str
+) -> tuple[FastMail, list[MessageSchema, str]]:
+    """Sends email letter that contain action link."""
+
+    # 1. Encode the username and pasting it into the url
+    encoded_user_data: str = Signer.sign_object({'username': username})
+    action_link: str = prefix_link.format(encoded_user_data)
+
+    # 2. Composing a letter to send. Letter with action link.
+    match action:
+        case 'confirm_email':
+            email, params = compose_confirm_email(email=email, url=action_link)
+        case 'reset_password':
+            email, params = compose_reset_password_email(email=email, url=action_link)
+        case _:
+            logger.exception(
+                ValueError("The 'action' argument must be 'confirm_email' or 'reset_password' only.")
+            )
+            raise JSONException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message=get_text('err_500')
+            )
+    return email, params
