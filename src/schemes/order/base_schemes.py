@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from datetime import timedelta as td
 from typing import Literal, Any
 
 from pydantic import BaseModel, Field, root_validator
@@ -15,12 +16,12 @@ class OrderBaseSchema(BaseModel):
 
 class OrderPatchSchema(OrderBaseSchema):
     start_datetime: dt | None = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
-    end_datetime: dt | None = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
+    end_datetime: dt | None = Field((dt.utcnow() + td(hours=1)).strftime('%Y-%m-%dT%H:%M'))
     status: Literal['processing'] | Literal['confirmed'] | None
     cost: float | None
-    user_id: int | None
-    add_tables: list[int] | None
-    delete_tables: list[int] | None
+    user_id: int | None = Field(None, ge=1)
+    add_tables: list[int] | None = Field(None, ge=1)
+    delete_tables: list[int] | None = Field(None, ge=1)
 
     @root_validator(pre=True)
     def order_base_validate(cls, values):
