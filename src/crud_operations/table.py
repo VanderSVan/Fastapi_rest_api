@@ -1,21 +1,29 @@
 from sqlalchemy import and_
 
-from .base_crud_operations import ModelOperation
-from ..models.table import TableModel
-from ..schemas.table.base_schemas import TablePatchSchema
+from src.models.table import TableModel
+from src.schemes.table.base_schemes import TablePatchSchema
+from src.crud_operations.base_crud_operations import ModelOperation
 
 
 class TableOperation(ModelOperation):
-    def __init__(self, db):
+    def __init__(self, db, user):
         self.model = TableModel
+        self.model_name = 'table'
         self.patch_schema = TablePatchSchema
-        self.response_elem_name = 'table'
         self.db = db
+        self.user = user
 
     def find_all_by_params(self, **kwargs) -> list[TableModel]:
+        """
+        Finds all tables in the db by given parameters.
+        But before that it checks the user's access.
+        :param kwargs: dictionary with parameters.
+        :return: tables list or an empty list if no tables were found.
+        """
         type = kwargs.get('type')
         number_of_seats = kwargs.get('number_of_seats')
         price_per_hour = kwargs.get('price_per_hour')
+
         return (self.db
                 .query(TableModel)
                 .filter(and_(
@@ -27,4 +35,5 @@ class TableOperation(ModelOperation):
                               if price_per_hour is not None else True)
                             )
                         )
-                .all())
+                .all()
+                )

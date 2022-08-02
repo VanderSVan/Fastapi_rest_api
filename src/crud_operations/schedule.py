@@ -2,19 +2,25 @@ from datetime import date, datetime as dt
 
 from sqlalchemy import and_
 
-from .base_crud_operations import ModelOperation
-from ..models.schedule import ScheduleModel
-from ..schemas.schedule.base_schemas import SchedulePatchSchema
+from src.models.schedule import ScheduleModel
+from src.schemes.schedule.base_schemes import SchedulePatchSchema
+from src.crud_operations.base_crud_operations import ModelOperation
 
 
 class ScheduleOperation(ModelOperation):
-    def __init__(self, db):
+    def __init__(self, db, user):
         self.model = ScheduleModel
+        self.model_name = 'schedule'
         self.patch_schema = SchedulePatchSchema
-        self.response_elem_name = 'schedule'
         self.db = db
+        self.user = user
 
     def find_all_by_params(self, **kwargs) -> list[ScheduleModel]:
+        """
+        Finds all schedules in the db by given parameters.
+        :param kwargs: dictionary with parameters.
+        :return: schedules list or an empty list if no schedules were found.
+        """
         _date = str(kwargs.get('day')) if isinstance(kwargs.get('day'), (dt, date)) else None
         _week_day = kwargs.get('day').capitalize() if isinstance(kwargs.get('day'), str) else None
 
@@ -23,6 +29,7 @@ class ScheduleOperation(ModelOperation):
         close_time = kwargs.get('close_time')
         break_start_time = kwargs.get('break_start_time')
         break_end_time = kwargs.get('break_end_time')
+
         return (self.db
                     .query(ScheduleModel)
                     .filter(and_(
@@ -38,4 +45,5 @@ class ScheduleOperation(ModelOperation):
                                   if break_end_time is not None else True)
                                 )
                             )
-                    .all())
+                    .all()
+                )

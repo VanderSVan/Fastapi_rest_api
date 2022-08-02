@@ -1,4 +1,6 @@
 .idea
 /src/.env
 /gg.py
-/src/logger/logs/
+/src/utils/logger/logs/
+/.pytest_cache/
+config.py

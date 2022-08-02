@@ -1,8 +1,21 @@
 {
-  "post": "{} id={} was successfully created",
-  "patch": "{} id={} was successfully updated",
-  "delete": "{} id={} was successfully deleted",
-  "not_found": "{} id={} not found",
-  "exists": "{} id={} already exists",
-  "err_patch": "only '{}' and '{}' fields are available in the 'PATCH' method, but was given '{}' field"
+  "post": "{} with id={} was successfully created.",
+  "patch": "{} with id={} was successfully updated.",
+  "delete": "{} with id={} was successfully deleted.",
+  "not_found": "{} with id={} not found.",
+  "param_not_found": "{} with {}={} not found.",
+  "exists": "{} id={} already exists.",
+  "err_patch": "Only '{}' and '{}' fields are available in the 'PATCH' method, but was given '{}' field.",
+  "err_500": "Server side error.",
+
+  "email_confirmed": "E-mail has been successfully confirmed.",
+  "email_not_confirmed": "First confirm your email address.",
+  "email_already_confirmed": "User = '{}' has already confirmed their e-mail address.",
+  "authenticate_failed": "login or password is not correct.",
+  "forbidden_request": "Access is denied.",
+  "reset_password": "A password reset email has been sent to your email",
+  "changed_password": "Password has been successfully changed.",
+
+
+  "decode_signature_fail": "Failed decrypting user data. Error = {}."
 }

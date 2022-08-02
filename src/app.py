@@ -2,16 +2,17 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
-from .routers import client, order, schedule, table
-from .utils.exceptions import JSONException
-from .logger.main import logger
+from src.routers import user, users_auth, order, schedule, table
+
+from src.utils.exceptions import JSONException
+from src.utils.logger.main import logger
 
 
 def create_app():
     application = FastAPI()
-
     # Routers
-    application.include_router(client.router)
+    application.include_router(users_auth.router)
+    application.include_router(user.router)
     application.include_router(order.router)
     application.include_router(schedule.router)
     application.include_router(table.router)

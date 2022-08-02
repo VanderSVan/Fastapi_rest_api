@@ -7,7 +7,7 @@ If language changes, set `responses.main.default_locale` and run `responses.main
 """
 import json
 from pathlib import Path
-from ...logger.main import logger
+from src.utils.logger.main import logger
 
 
 default_locale: str = "en"

@@ -6,7 +6,7 @@ from psycopg2 import connect, OperationalError
 from psycopg2.extensions import connection as psycopg2_conn, ISOLATION_LEVEL_AUTOCOMMIT
 from dataclasses import dataclass
 
-from src.logger.main import logger
+from src.utils.logger.main import logger
 
 load_dotenv()
 
