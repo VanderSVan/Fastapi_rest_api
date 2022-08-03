@@ -6,10 +6,16 @@ from src.routers import user, users_auth, order, schedule, table
 
 from src.utils.exceptions import JSONException
 from src.utils.logger.main import logger
+from src.utils.populating_db.inserting_data_into_db import insert_data_to_db
+from src.utils.populating_db.input_data import (users_json,
+                                                tables_json,
+                                                schedules_json,
+                                                order_json)
 
 
-def create_app():
+def create_app(with_data: bool = False):
     application = FastAPI()
+
     # Routers
     application.include_router(users_auth.router)
     application.include_router(user.router)
@@ -51,7 +57,10 @@ def create_app():
                             content={"message": {'err_name': err_name,
                                                  'traceback': traceback}})
 
+    if with_data:
+        insert_data_to_db(users_json, tables_json, schedules_json, order_json)
+
     return application
 
 
-app = create_app()
+app = create_app(with_data=True)
