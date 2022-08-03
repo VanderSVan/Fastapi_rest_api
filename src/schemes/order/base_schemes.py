@@ -4,13 +4,12 @@ from typing import Literal, Any
 
 from pydantic import BaseModel, Field, root_validator
 
-from ..validators.order import OrderBaseValidator, OrderPatchValidator, OrderPostValidator
+from src.schemes.validators.order import OrderBaseValidator, OrderPostOrPatchValidator
 
 
 class OrderBaseSchema(BaseModel):
     start_datetime: dt = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
     end_datetime: dt = Field(dt.utcnow().strftime('%Y-%m-%dT%H:%M'))
-    status: Literal['processing'] | Literal['confirmed']
     user_id: int = Field(..., ge=1)
 
 
@@ -30,7 +29,7 @@ class OrderPatchSchema(OrderBaseSchema):
 
     @root_validator()
     def order_post_validate(cls, values):
-        validator = OrderPatchValidator(values)
+        validator = OrderPostOrPatchValidator(values)
         return validator.validate_data()
 
 
@@ -48,12 +47,13 @@ class OrderPostSchema(OrderBaseSchema):
 
     @root_validator()
     def order_post_validate(cls, values):
-        validator = OrderPostValidator(values)
+        validator = OrderPostOrPatchValidator(values)
         return validator.validate_data()
 
 
 class OrderGetSchema(OrderBaseSchema):
     id: int
+    status: Literal['processing'] | Literal['confirmed']
     cost: Any
 
     class Config:

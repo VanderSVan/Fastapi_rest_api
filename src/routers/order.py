@@ -43,19 +43,19 @@ class OrderInterfaceForGetAll:
 class OrderInterfaceForPatch:
     data: OrderPatchSchema
     id: int = Path(..., ge=1)
-    admin: UserModel = Depends(get_current_admin_or_superuser)
+    # admin: UserModel = Depends(get_current_admin_or_superuser)
 
 
 @dataclass
 class OrderInterfaceForDelete:
     id: int = Path(..., ge=1)
-    admin: UserModel = Depends(get_current_admin_or_superuser)
+    # admin: UserModel = Depends(get_current_admin_or_superuser)
 
 
 @dataclass
 class OrderInterfaceForPost:
     data: OrderPostSchema
-    admin: UserModel = Depends(get_current_admin_or_superuser)
+    # admin: UserModel = Depends(get_current_admin_or_superuser)
 
 
 @cbv(router)
