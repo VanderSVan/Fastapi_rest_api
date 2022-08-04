@@ -41,10 +41,10 @@ class Schedule:
     def get_all_schedules(
             self,
             day: str | date = Query(default=None, description="Weekday or date"),
-            open_time: time = Query(default=None, description="HH:MM"),
-            close_time: time = Query(default=None, description="HH:MM"),
-            break_start_time: time = Query(default=None, description="HH:MM"),
-            break_end_time: time = Query(default=None, description="HH:MM")
+            open_time: time = Query(default=None, description="HH:MM, More or equal"),
+            close_time: time = Query(default=None, description="HH:MM, Less or equal"),
+            break_start_time: time = Query(default=None, description="HH:MM, More or equal"),
+            break_end_time: time = Query(default=None, description="HH:MM, Less or equal")
     ) -> list[ScheduleModel]:
         """
         Returns all schedules from db by parameters.

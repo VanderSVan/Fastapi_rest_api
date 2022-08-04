@@ -16,6 +16,11 @@
   "reset_password": "A password reset email has been sent to your email",
   "changed_password": "Password has been successfully changed.",
 
+  "schedule_err_required": "fields 'open_time' and 'close_time' are required.",
+  "schedule_err_open_equal_close": "fields 'open_time' and 'close_time' cannot be equal.",
+  "schedule_err_close_less_open": "'close_time' time cannot be less than 'open_time' time.",
+  "schedule_err_break_equal": "fields 'break_start_time' and 'break_end_time' cannot be equal.",
+  "schedule_err_break_end_less_start": "'break_end_time' time cannot be less than 'break_start_time' time.",
 
   "decode_signature_fail": "Failed decrypting user data. Error = {}."
 }
