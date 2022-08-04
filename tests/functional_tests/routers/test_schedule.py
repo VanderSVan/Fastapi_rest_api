@@ -227,16 +227,22 @@ class TestScheduleException:
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
 
-    @pytest.mark.parametrize("json_to_send, result_json", [
+    @pytest.mark.parametrize("json_to_send, result_json, status", [
         # don't give required fields:
         (
                 {
                     "break_start_time": "18:00",
                     "break_end_time": "18:30"
                 },
+                # it's pydantic output:
                 {
-                    'message': get_text("schedule_err_required")
-                }
+                    'detail': [
+                        {'loc': ['body', 'day'], 'msg': 'field required', 'type': 'value_error.missing'},
+                        {'loc': ['body', 'open_time'], 'msg': 'field required', 'type': 'value_error.missing'},
+                        {'loc': ['body', 'close_time'], 'msg': 'field required', 'type': 'value_error.missing'}
+                    ]
+                },
+                422
         ),
         # give equal fields open and close time
         (
@@ -249,7 +255,8 @@ class TestScheduleException:
                 },
                 {
                     'message': get_text("schedule_err_open_equal_close")
-                }
+                },
+                400
         ),
         # give equal fields break time
         (
@@ -262,7 +269,8 @@ class TestScheduleException:
                 },
                 {
                     'message': get_text("schedule_err_break_equal")
-                }
+                },
+                400
         ),
         # give open time that more than close time
         (
@@ -275,7 +283,8 @@ class TestScheduleException:
                 },
                 {
                     'message': get_text("schedule_err_close_less_open")
-                }
+                },
+                400
         ),
         # give break start time that more than break end time
         (
@@ -288,7 +297,8 @@ class TestScheduleException:
                 },
                 {
                     'message': get_text("schedule_err_break_end_less_start")
-                }
+                },
+                400
         ),
         # schedule already exists
         pytest.param(
@@ -303,16 +313,15 @@ class TestScheduleException:
             {
                 "message": {'err_name': 'sqlalchemy.exc.IntegrityError',
                             'traceback': "something about repeated key value 'day' = 'Tuesday'"}
-            }
-            ,
+            },
+            400,
             marks=pytest.mark.xfail(reason="repeated key value 'day' = 'Tuesday'")
         ),
     ])
-    def test_post_wrong_schedule(self, json_to_send, result_json, client, superuser_token_headers):
+    def test_post_wrong_schedule(self, json_to_send, result_json, status, client, superuser_token_headers):
         response = client.post(
             '/schedules/create', json=json_to_send, headers=superuser_token_headers
         )
-        assert response.status_code == 400
+        assert response.status_code == status
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
-

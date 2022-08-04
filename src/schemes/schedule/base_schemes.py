@@ -5,7 +5,7 @@ from datetime import timedelta as td
 
 from pydantic import BaseModel, Field, root_validator
 
-from src.schemes.validators.schedule import SchedulePatchValidator, SchedulePostValidator
+from src.schemes.validators.schedule import SchedulePostOrPatchValidator
 
 
 class ScheduleBaseSchema(BaseModel):
@@ -40,7 +40,7 @@ class SchedulePatchSchema(ScheduleBaseSchema):
 
     @root_validator()
     def schedule_patch_validate(cls, values):
-        validator = SchedulePatchValidator(values)
+        validator = SchedulePostOrPatchValidator(values)
         return validator.validate_data()
 
 
@@ -52,7 +52,7 @@ class SchedulePostSchema(ScheduleBaseSchema):
 
     @root_validator()
     def order_post_validate(cls, values):
-        validator = SchedulePostValidator(values)
+        validator = SchedulePostOrPatchValidator(values)
         return validator.validate_data()
 
 
