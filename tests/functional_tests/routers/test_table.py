@@ -81,7 +81,6 @@ class TestTable:
                 1,
                 {
                     "type": "private",
-                    "number_of_seats": 8,
                     "price_per_hour": 3000
                 },
                 {
