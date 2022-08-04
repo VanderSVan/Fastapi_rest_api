@@ -146,70 +146,56 @@ class TestScheduleException:
     @pytest.mark.parametrize("schedule_id, json_to_send, result_json", [
         # give equal fields open and close time
         (
-                2,
+                1,
                 {
-                    "day": "2023-01-01",
                     "open_time": "15:00",
-                    "close_time": "15:00",
-                    "break_start_time": "18:00",
-                    "break_end_time": "18:30"
+                    "close_time": "15:00"
                 },
-                {
-                    'message': get_text("schedule_err_open_equal_close")
-                }
+                {'message': get_text("schedule_err_open_equal_close")}
+        ),
+        # give close time that equal open time
+        (
+                2,
+                {"close_time": "08:00:00"},
+                {'message': get_text("schedule_err_open_equal_close")}
         ),
         # give equal fields break time
         (
                 3,
                 {
-                    "day": "2023-01-01",
-                    "open_time": "15:00",
-                    "close_time": "18:00",
                     "break_start_time": "18:00",
                     "break_end_time": "18:00"
                 },
-                {
-                    'message': get_text("schedule_err_break_equal")
-                }
+                {'message': get_text("schedule_err_break_equal")}
+        ),
+        # give break end time that equal break start time
+        (
+                4,
+                {"break_end_time": "12:00:00"},
+                {'message': get_text("schedule_err_break_equal")}
         ),
         # give open time that more than close time
         (
-                4,
+                5,
                 {
-                    "day": "2023-01-01",
                     "open_time": "18:00",
-                    "close_time": "15:00",
-                    "break_start_time": "18:00",
-                    "break_end_time": "18:30"
+                    "close_time": "15:00"
                 },
-                {
-                    'message': get_text("schedule_err_close_less_open")
-                }
+                {'message': get_text("schedule_err_close_less_open")}
         ),
         # give break start time that more than break end time
         (
-                5,
+                6,
                 {
-                    "day": "2023-01-01",
-                    "open_time": "15:00",
-                    "close_time": "18:00",
                     "break_start_time": "18:00",
                     "break_end_time": "17:00"
                 },
-                {
-                    'message': get_text("schedule_err_break_end_less_start")
-                }
+                {'message': get_text("schedule_err_break_end_less_start")}
         ),
         # schedule already exists
         pytest.param(
             6,
-            {
-                "day": "Tuesday",
-                "open_time": "08:00:00",
-                "close_time": "17:00:00",
-                "break_start_time": "13:00:00",
-                "break_end_time": "14:00:00",
-            },
+            {"day": "Tuesday"},
 
             {
                 "message": {'err_name': 'sqlalchemy.exc.IntegrityError',
