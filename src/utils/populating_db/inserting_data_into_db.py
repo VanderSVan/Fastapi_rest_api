@@ -1,6 +1,5 @@
 # !!! Inserting data into an empty database only !!!
 
-from src.db.db_sqlalchemy import SessionLocal
 from src.models.user import UserModel
 from src.models.table import TableModel
 from src.models.schedule import ScheduleModel
@@ -12,9 +11,10 @@ from src.utils.logger.main import logger
 def insert_data_to_db(users_json: list,
                       tables_json: list,
                       schedules_json: list,
-                      orders_json: list) -> None:
+                      orders_json: list,
+                      session) -> None:
     """Inserts prepared data into an empty database only!"""
-    db = SessionLocal()
+    db = session()
     try:
         if (
                 db.query(UserModel).count() == 0
