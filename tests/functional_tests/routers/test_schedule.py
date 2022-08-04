@@ -103,8 +103,6 @@ class TestSchedule:
         (
                 1,
                 {
-                    "day": "Monday",
-                    "open_time": "12:00",
                     "close_time": "20:00"
                 },
                 {
@@ -146,17 +144,6 @@ class TestSchedule:
 
 class TestScheduleException:
     @pytest.mark.parametrize("schedule_id, json_to_send, result_json", [
-        # don't give required fields:
-        (
-                1,
-                {
-                    "break_start_time": "18:00",
-                    "break_end_time": "18:30"
-                },
-                {
-                    'message': get_text("schedule_err_required")
-                }
-        ),
         # give equal fields open and close time
         (
                 2,
