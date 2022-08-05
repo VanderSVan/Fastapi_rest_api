@@ -116,3 +116,36 @@ class TestTable:
         assert response.status_code == 201
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
+        
+        
+class TestTableException:
+    @pytest.mark.parametrize("patch_json_to_send, post_json_to_send", [
+        (
+            {
+                "type": "private",
+                "price_per_hour": 3000
+            },
+            {
+                "type": "vip_room",
+                "number_of_seats": 8,
+                "price_per_hour": 30000
+            }
+        )
+
+    ])
+    def test_forbidden_request(self, patch_json_to_send, post_json_to_send, client, confirmed_client_token_headers):
+        response_delete = client.delete(
+            '/tables/1', headers=confirmed_client_token_headers
+        )
+        response_patch = client.patch(
+            '/tables/1', json=patch_json_to_send, headers=confirmed_client_token_headers
+        )
+        response_post = client.patch(
+            '/tables/1', json=post_json_to_send, headers=confirmed_client_token_headers
+        )
+        responses: tuple = (response_delete, response_patch, response_post)
+        for response in responses:
+            assert response.status_code == 403
+            assert 'application/json' in response.headers['Content-Type']
+            assert response.json()['message'] == get_text('forbidden_request')
+

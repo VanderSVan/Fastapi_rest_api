@@ -44,7 +44,7 @@ class Table:
                        ):
         """
         Returns all tables from db by parameters.
-        Available to everyone.
+        Available to all confirmed users.
         """
         table_objs: list[TableModel] = self.table_operation.find_all_by_params(type=type,
                                                                                number_of_seats=number_of_seats,
@@ -63,7 +63,7 @@ class Table:
                   ):
         """
         Returns one table from db by table id.
-        Available to everyone.
+        Available to all confirmed users.
         """
         table_obj: TableModel = self.table_operation.find_by_id_or_404(table_id)
 
