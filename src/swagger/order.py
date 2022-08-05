@@ -2,14 +2,16 @@ from dataclasses import dataclass
 from datetime import date, datetime as dt
 from typing import Optional, Type, Any, Literal
 
-from fastapi import Query, status
+from fastapi import Depends, Query, status
 
+from src.models.user import UserModel
 from src.schemes.order.base_schemes import (OrderGetSchema,
                                             OrderPatchSchema,
                                             OrderPostSchema)
 from src.schemes.order.response_schemes import (OrderResponsePatchSchema,
                                                 OrderResponseDeleteSchema,
                                                 OrderResponsePostSchema)
+from src.utils.dependencies.auth import get_current_admin_or_superuser
 
 
 @dataclass

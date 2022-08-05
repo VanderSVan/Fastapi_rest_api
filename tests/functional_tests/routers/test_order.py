@@ -205,7 +205,6 @@ class TestOrderException:
         response = client.patch(
             f'/orders/{order_id}', json=json_to_send, headers=superuser_token_headers
         )
-        print(response.json())
         assert response.status_code == status
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
@@ -262,3 +261,23 @@ class TestOrderException:
         assert response.status_code == status
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
+
+    @pytest.mark.parametrize("json_to_send", [
+        {
+            "status": "confirmed",
+            "add_tables": [2, 3, 4, 5],
+            "delete_tables": [1, 2, 6]
+        }
+    ])
+    def test_forbidden_request(self, json_to_send, client, confirmed_client_token_headers):
+        response_delete = client.delete(
+            '/orders/1', headers=confirmed_client_token_headers
+        )
+        response_patch = client.patch(
+            '/orders/1', json=json_to_send, headers=confirmed_client_token_headers
+        )
+        responses: tuple = (response_delete, response_patch)
+        for response in responses:
+            assert response.status_code == 404
+            assert 'application/json' in response.headers['Content-Type']
+            assert response.json()['message'] == get_text('not_found').format('order', 1)

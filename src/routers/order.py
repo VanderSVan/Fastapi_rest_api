@@ -43,7 +43,7 @@ class Order:
                        ) -> list[OrderModel] | list[None]:
         """
         Returns all orders from db by parameters.
-        Available to everyone.
+        Available to all confirmed users.
         """
         params: dict = {
             'start_datetime': order.start_datetime,
@@ -58,7 +58,7 @@ class Order:
     def get_order(self, order_id: int = Path(..., ge=1)) -> OrderModel | None:
         """
         Returns one order from db by order id.
-        Available to everyone.
+        Available to all confirmed users.
         """
         return self.order_operation.find_by_id(order_id)
 
@@ -96,7 +96,7 @@ class Order:
                   ) -> JSONResponse:
         """
         Adds new order into db.
-        Only available to admins.
+        Available to all confirmed users.
         """
         order = self.order_operation.add_obj(order.data)
 
