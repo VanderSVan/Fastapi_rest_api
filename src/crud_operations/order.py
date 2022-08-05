@@ -29,15 +29,11 @@ class OrderOperation(ModelOperation):
         """
         Finds all orders in the db by given parameters.
         But before that it checks the user's access.
+        If it's not superuser, it only looks for orders associated with the user id.
         :param kwargs: dictionary with parameters.
         :return: orders list or an empty list if no orders were found.
         """
-        # Checking user access.
-        if not self.check_user_access():
-            user_id: int = self.user.id
-        else:
-            user_id: int = kwargs.get('user_id')
-
+        user_id: int = self.user.id if not self.check_user_access() else kwargs.get('user_id')
         start_datetime: dt | date = kwargs.get('start_datetime')
         end_datetime: dt = self._process_end_datetime(kwargs.get('end_datetime'))
         status_: str = kwargs.get('status')
@@ -70,7 +66,7 @@ class OrderOperation(ModelOperation):
         :param new_data: new order data to update.
         :return: updated order.
         """
-        # Check input data
+        # Check input data.
         self._check_input_data(new_data)
 
         # Get order object from db or raise 404 exception.
@@ -78,30 +74,14 @@ class OrderOperation(ModelOperation):
         old_order: OrderModel = self.find_by_id_or_404(id_)
 
         # Get nested tables.
-        existing_order_tables: list[TableModel] = old_order.tables
+        old_order_tables: list[TableModel] = old_order.tables
 
-        # Extract order data by scheme.
-        old_order_data: OrderPatchSchema = self.patch_schema(**old_order.__dict__)
+        # Prepare new data.
+        prepared_new_data: OrderPatchSchema = self._prepare_data_for_patch_operation(old_order, new_data)
 
-        # Update order data.
-        data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        if data_to_update:
-            updated_data: OrderPatchSchema = old_order_data.copy(update=data_to_update)  # replace only changed data
-        else:
-            raise JSONException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                message=get_text('err_patch_no_data')
-            )
-
-        # Check datetime values, required if only one datetime field was given.
-        OrderPostOrPatchValidator.check_datetime_values(
-            updated_data.start_datetime, updated_data.end_datetime
-        )
-
-        # Update order.
-        for key, value in updated_data:
-            OrderUtils.add_or_delete_order_tables(key, value, existing_order_tables, self.db)
-
+        # Update old order object.
+        for key, value in prepared_new_data:
+            OrderUtils.add_or_delete_order_tables(key, value, old_order_tables, self.db)
             if hasattr(old_order, key):
                 setattr(old_order, key, value)
 
@@ -175,6 +155,36 @@ class OrderOperation(ModelOperation):
                                                          data.end_datetime,
                                                          data.tables)
         return checked_data
+
+    def _prepare_data_for_patch_operation(self,
+                                          old_data: OrderModel,
+                                          new_data: OrderPatchSchema
+                                          ) -> OrderPatchSchema:
+        """
+        Executes all necessary checks to update the order data.
+        :param old_data: data from db.
+        :param new_data: order update data.
+        :return: updated data.
+        """
+        # Extract order data by scheme.
+        old_order_data: OrderPatchSchema = self.patch_schema(**old_data.__dict__)
+
+        # Update order data.
+        data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
+        if data_to_update:
+            updated_data: OrderPatchSchema = old_order_data.copy(update=data_to_update)  # replace only changed data
+        else:
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('err_patch_no_data')
+            )
+
+        # Check datetime values, required if only one datetime field was given.
+        OrderPostOrPatchValidator.check_datetime_values(
+            updated_data.start_datetime, updated_data.end_datetime
+        )
+
+        return updated_data
 
     @staticmethod
     def _process_end_datetime(end: dt):
