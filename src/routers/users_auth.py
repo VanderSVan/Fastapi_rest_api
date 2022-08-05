@@ -1,5 +1,4 @@
 from datetime import timedelta as td
-from typing import NoReturn
 
 from fastapi import Depends, BackgroundTasks, status
 from fastapi.responses import JSONResponse
@@ -8,25 +7,23 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..models.user import UserModel
-from ..schemes.user.base_schemes import (UserGetSchema,
-                                         UserPatchSchema,
-                                         UserPostSchema,
-                                         UserResetPasswordSchema)
-from ..schemes.user.response_schemes import (UserResponseConfirmEmailSchema,
-                                             UserResponseResetPasswordSchema,
-                                             UserResponseConfirmResetPasswordSchema)
-from ..schemes.jwt.response_schemes import Token
+from src.models.user import UserModel
+from src.schemes.user.base_schemes import (UserGetSchema,
+                                           UserPostSchema,
+                                           UserResetPasswordSchema)
+from src.schemes.user.response_schemes import (UserResponseConfirmEmailSchema,
+                                               UserResponseResetPasswordSchema,
+                                               UserResponseConfirmResetPasswordSchema)
+from src.schemes.jwt.response_schemes import Token
 
-from ..crud_operations.user import UserOperation
-from ..utils.dependencies.db import get_db
-from ..utils.dependencies.auth import get_current_confirmed_user
-from ..utils.responses.main import get_text
-from ..utils.auth_utils.signature import Signer
-from ..utils.auth_utils.jwt import JWT
-from ..config import Settings
-from ..services.email.main import compose_email_with_action_link
-from ..crud_operations.user_auth import UserAuthOperation
+from src.utils.dependencies.db import get_db
+from src.utils.dependencies.auth import get_current_confirmed_user
+from src.utils.responses.main import get_text
+from src.utils.auth_utils.signature import Signer
+from src.utils.auth_utils.jwt import JWT
+from src.config import Settings
+from src.services.email.main import compose_email_with_action_link
+from src.crud_operations.user_auth import UserAuthOperation
 
 # Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.

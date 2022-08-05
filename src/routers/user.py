@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import Depends, Query, Path, status
 from fastapi.responses import JSONResponse
 from fastapi_utils.cbv import cbv
@@ -32,13 +34,16 @@ class User:
     ###############################################################
     @router.get("/users/", response_model=list[UserGetSchema], status_code=status.HTTP_200_OK)
     def get_all_users(self,
-                      phone: str = Query(default=None, description="Phone number")
+                      phone: str = Query(default=None, description="Phone number"),
+                      status: Literal['confirmed'] | Literal['unconfirmed'] = Query(
+                          default=None, description="'confirmed' or 'unconfirmed'"
+                      )
                       ) -> list[UserModel] | list[None]:
         """
         Returns all users from db by parameters.
         Only available to admins.
         """
-        return self.user_operation.find_all_by_params(phone=phone)
+        return self.user_operation.find_all_by_params(phone=phone, status=status)
 
     ###############################################################
     @router.get("/users/{user_id}", response_model=UserGetSchema, status_code=status.HTTP_200_OK)

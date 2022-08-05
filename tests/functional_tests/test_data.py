@@ -3,7 +3,7 @@
 users_json: list = [
     {
         "username": "superuser",
-        "email": "superuser@example.com",
+        "email": "pukan1488@gmail.com",
         "phone": "123456789",
         "role": "superuser",
         "id": 1,
@@ -34,7 +34,7 @@ users_json: list = [
         "phone": "1478523690",
         "role": "client",
         "id": 4,
-        "status": "confirmed",
+        "status": "unconfirmed",
         "password": "123654789"
     }
 ]

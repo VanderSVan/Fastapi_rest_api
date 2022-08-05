@@ -11,7 +11,9 @@ from src.config import TestingConfiguration
 from src.utils.dependencies.db import get_db
 from src.utils.populating_db.inserting_data_into_db import insert_data_to_db
 from tests.functional_tests.test_data import users_json, tables_json, schedules_json, order_json
-from tests.functional_tests.utils import get_superuser_token_headers
+from tests.functional_tests.utils import (get_superuser_token_headers,
+                                          get_client1_token_headers,
+                                          get_client2_token_headers)
 
 URL = TestingConfiguration.SQLALCHEMY_DATABASE_URL
 engine = create_engine(URL)
@@ -34,7 +36,7 @@ def override_get_db():
     connection.close()
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="package", autouse=True)
 def create_test_db():
     with PsqlDatabaseConnection() as conn:
         database = DatabaseOperation(connection=conn,
@@ -57,3 +59,13 @@ def client():
 @pytest.fixture(scope="module")
 def superuser_token_headers(client: TestClient) -> Dict[str, str]:
     return get_superuser_token_headers(client)
+
+
+@pytest.fixture(scope="module")
+def confirmed_client_token_headers(client: TestClient) -> Dict[str, str]:
+    return get_client1_token_headers(client)
+
+
+@pytest.fixture(scope="module")
+def unconfirmed_client_token_headers(client: TestClient) -> Dict[str, str]:
+    return get_client2_token_headers(client)
