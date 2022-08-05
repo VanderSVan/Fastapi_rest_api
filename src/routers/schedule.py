@@ -48,7 +48,7 @@ class Schedule:
     ) -> list[ScheduleModel]:
         """
         Returns all schedules from db by parameters.
-        Available to everyone.
+        Available to all confirmed users.
         """
         return self.schedule_operation.find_all_by_params(day=day,
                                                           open_time=open_time,
@@ -67,7 +67,7 @@ class Schedule:
                      ) -> ScheduleGetSchema:
         """
         Returns one schedule from db by schedule id.
-        Available to everyone.
+        Available to all confirmed users.
         """
         return self.schedule_operation.find_by_id_or_404(schedule_id)
 

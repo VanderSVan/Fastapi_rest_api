@@ -102,9 +102,7 @@ class TestSchedule:
     @pytest.mark.parametrize("schedule_id, json_to_send, result_json", [
         (
                 1,
-                {
-                    "close_time": "20:00"
-                },
+                {"close_time": "20:00"},
                 {
                     'message': get_text("patch").format('schedule', 1)
                 }
@@ -202,7 +200,7 @@ class TestScheduleException:
                             'traceback': "something about repeated key value 'day' = 'Tuesday'"}
             }
             ,
-            marks=pytest.mark.xfail(reason="repeated key value 'day' = 'Tuesday'")
+            marks=pytest.mark.xfail(reason="'day' = 'Tuesday' already exists")
         ),
     ])
     def test_patch_wrong_schedule(self, schedule_id, json_to_send, result_json, client, superuser_token_headers):
@@ -311,3 +309,32 @@ class TestScheduleException:
         assert response.status_code == status
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
+
+    @pytest.mark.parametrize("patch_json_to_send, post_json_to_send", [
+        (
+            {"close_time": "20:00"},
+            {
+                "day": "2023-01-01",
+                "open_time": "15:00",
+                "close_time": "22:00",
+                "break_start_time": "18:00",
+                "break_end_time": "18:30"
+            }
+        )
+
+    ])
+    def test_forbidden_request(self, patch_json_to_send, post_json_to_send, client, confirmed_client_token_headers):
+        response_delete = client.delete(
+            '/schedules/1', headers=confirmed_client_token_headers
+        )
+        response_patch = client.patch(
+            '/schedules/1', json=patch_json_to_send, headers=confirmed_client_token_headers
+        )
+        response_post = client.patch(
+            '/schedules/1', json=post_json_to_send, headers=confirmed_client_token_headers
+        )
+        responses: tuple = (response_delete, response_patch, response_post)
+        for response in responses:
+            assert response.status_code == 403
+            assert 'application/json' in response.headers['Content-Type']
+            assert response.json()['message'] == get_text('forbidden_request')
