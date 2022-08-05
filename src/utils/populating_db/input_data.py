@@ -32,7 +32,7 @@ users_json: list = [
         "phone": "1478523690",
         "role": "client",
         "id": 4,
-        "status": "confirmed",
+        "status": "unconfirmed",
         "password": "123654789"
     }
 ]
