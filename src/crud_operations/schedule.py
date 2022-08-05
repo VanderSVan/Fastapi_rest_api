@@ -1,11 +1,14 @@
 from datetime import date, datetime as dt
 
+from fastapi import status
 from sqlalchemy import and_
 
 from src.models.schedule import ScheduleModel
 from src.schemes.schedule.base_schemes import SchedulePatchSchema
 from src.crud_operations.base_crud_operations import ModelOperation
 from src.schemes.validators.schedule import SchedulePostOrPatchValidator
+from src.utils.exceptions import JSONException
+from src.utils.responses.main import get_text
 
 
 class ScheduleOperation(ModelOperation):
@@ -66,7 +69,13 @@ class ScheduleOperation(ModelOperation):
 
         # Update schedule data.
         data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        updated_data: SchedulePatchSchema = old_schedule_data.copy(update=data_to_update)  # replace only changed data
+        if data_to_update:
+            updated_data: SchedulePatchSchema = old_schedule_data.copy(update=data_to_update)  # replace only changed data
+        else:
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('err_patch_no_data')
+            )
 
         # Check time values, required if only one time field was given.
         SchedulePostOrPatchValidator.check_open_close_time(
