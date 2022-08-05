@@ -39,13 +39,7 @@ class OrderOperation(ModelOperation):
             user_id: int = kwargs.get('user_id')
 
         start_datetime: dt | date = kwargs.get('start_datetime')
-
-        end: dt | date = kwargs.get('end_datetime')
-        end_datetime = (
-            dt(year=end.year, month=end.month, day=end.day, hour=23, minute=59, second=59)
-            if type(end) is date else end
-        )
-
+        end_datetime: dt = self._process_end_datetime(kwargs.get('end_datetime'))
         status_: str = kwargs.get('status')
         cost: float = kwargs.get('cost')
 
@@ -181,3 +175,19 @@ class OrderOperation(ModelOperation):
                                                          data.end_datetime,
                                                          data.tables)
         return checked_data
+
+    @staticmethod
+    def _process_end_datetime(end: dt):
+        """
+        If date:
+            Replaces empty time values to '23:59:59'.
+            For proper search operation.
+        else:
+            Do nothing.
+        :param end: date or datetime value.
+        :return: datetime obj.
+        """
+        return (
+            dt(year=end.year, month=end.month, day=end.day, hour=23, minute=59, second=59)
+            if type(end) is date else end
+        )
