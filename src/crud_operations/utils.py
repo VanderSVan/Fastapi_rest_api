@@ -113,6 +113,8 @@ class OrderUtils:
                                    ) -> NoReturn:
         """
         Adds or deletes tables from order.
+        If the tables that is given for method 'add_tables' does not exist then raises exception.
+        If the tables that is given for method 'delete_tables' does not exist then nothing happens.
         :param action: table action - delete or add.
         :param new_table_ids: new table numbers.
         :param existing_tables: existing table objects.
@@ -124,6 +126,7 @@ class OrderUtils:
                 message=get_text('err_patch').format('add_tables', 'delete_tables', 'tables')
             )
         if action == 'add_tables' and new_table_ids:
+            # If the table exists, add it or raise exception.
             table_operation = TableOperation(db=db, user=None)
             new_tables: list[TableModel] = cls._collect_new_tables_by_id(new_table_ids,
                                                                          existing_tables,
@@ -131,6 +134,7 @@ class OrderUtils:
             existing_tables.extend(new_tables)
 
         elif action == 'delete_tables' and new_table_ids:
+            # If the table exists, delete it or do nothing.
             for table_number, table in enumerate(existing_tables):
                 if table.id in new_table_ids:
                     del existing_tables[table_number]
@@ -148,7 +152,6 @@ class OrderUtils:
                                   table_operation: TableOperation
                                   ) -> list[TableModel]:
         """Creates a list with new tables excluding existing ones."""
-        # table_operation = TableOperation(db=self.db, user=None)
         existing_table_ids: list[int] = [table_obj.id for table_obj in existing_tables]
         return [table_operation.find_by_id_or_404(table_id)
                 for table_id in new_table_ids

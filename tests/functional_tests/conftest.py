@@ -34,7 +34,7 @@ def override_get_db():
     connection.close()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="package")
 def create_test_db():
     with PsqlDatabaseConnection() as conn:
         database = DatabaseOperation(connection=conn,
@@ -43,14 +43,12 @@ def create_test_db():
                                      user_password=db_config['user_password'])
         database.drop_all()
         database.create_all()
-
-    BaseModel.metadata.create_all(bind=engine)
-    insert_data_to_db(users_json, tables_json, schedules_json, order_json, TestingSessionLocal)
-    yield
+        BaseModel.metadata.create_all(bind=engine)
+        insert_data_to_db(users_json, tables_json, schedules_json, order_json, TestingSessionLocal)
 
 
 @pytest.fixture(scope='session')
-def client(create_test_db):
+def client():
     test_app = create_app(with_logger=False)
     test_app.dependency_overrides[get_db] = override_get_db
     return TestClient(test_app)

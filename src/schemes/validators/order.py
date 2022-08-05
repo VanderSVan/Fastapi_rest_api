@@ -4,7 +4,8 @@ from typing import NoReturn
 
 from fastapi import status
 
-from ...utils.exceptions import JSONException
+from src.utils.exceptions import JSONException
+from src.utils.responses.main import get_text
 
 
 @dataclass
@@ -72,22 +73,32 @@ class OrderPostOrPatchValidator:
 
     def validate_data(self) -> dict:
         """Main validator"""
-        self._check_datetime_values()
-        return self.order_data
-
-    def _check_datetime_values(self) -> NoReturn:
-        """Base validator for start and end values"""
         start: dt = self.order_data.get('start_datetime')
         end: dt = self.order_data.get('end_datetime')
 
+        if self.check_existing_time(start, end):
+            self.check_datetime_values(start, end)
+
+        return self.order_data
+
+    @staticmethod
+    def check_existing_time(start: dt, end: dt) -> bool:
+        if start and end:
+            return True
+        return False
+
+    @staticmethod
+    def check_datetime_values(start: dt, end: dt) -> NoReturn:
+        """Base validator for start and end values"""
+
         if end == start:
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="fields 'start_datetime' and 'end_datetime' cannot be equal")
+                                message=get_text('order_err_start_equal_end'))
 
         if end < start:
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="'end' time cannot be less than 'start' time")
+                                message=get_text('order_err_end_less_start'))
 
         if start.date() != end.date():
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="'start' and 'end' datetime must have the same day")
+                                message=get_text('order_err_not_same_day'))

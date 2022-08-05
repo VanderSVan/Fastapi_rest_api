@@ -151,7 +151,8 @@ order_json: list = [
         "tables": [
             6
         ],
-        "cost": 15000
+        "cost": 15000,
+        "id": 1
     },
     {
         "start_datetime": "2022-08-03T15:00",
@@ -161,7 +162,8 @@ order_json: list = [
         "tables": [
             1, 2, 3
         ],
-        "cost": 7000
+        "cost": 7000,
+        "id": 2
     },
     {
         "start_datetime": "2022-03-08T15:00",
@@ -171,6 +173,7 @@ order_json: list = [
         "tables": [
             4, 5, 6
         ],
-        "cost": 26000
+        "cost": 26000,
+        "id": 3
     }
 ]

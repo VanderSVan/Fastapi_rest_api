@@ -154,7 +154,13 @@ class ModelOperation:
 
         # Update data.
         data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        updated_data: BaseSchema = old_data.copy(update=data_to_update)  # replace only changed data
+        if data_to_update:
+            updated_data: BaseSchema = old_data.copy(update=data_to_update)  # replace only changed data
+        else:
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('err_patch_no_data')
+            )
 
         # Update db object.
         for key, value in updated_data:

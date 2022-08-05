@@ -1,5 +1,5 @@
 from typing import NoReturn
-from datetime import date
+from datetime import date, datetime as dt
 
 from fastapi import status
 from sqlalchemy import and_
@@ -12,7 +12,9 @@ from src.crud_operations.base_crud_operations import ModelOperation
 from src.crud_operations.schedule import ScheduleOperation
 from src.crud_operations.table import TableOperation
 from src.crud_operations.utils import OrderUtils
+from src.schemes.validators.order import OrderPostOrPatchValidator
 from src.utils.exceptions import JSONException
+from src.utils.responses.main import get_text
 
 
 class OrderOperation(ModelOperation):
@@ -32,14 +34,20 @@ class OrderOperation(ModelOperation):
         """
         # Checking user access.
         if not self.check_user_access():
-            user_id = self.user.id
+            user_id: int = self.user.id
         else:
-            user_id = kwargs.get('user_id')
+            user_id: int = kwargs.get('user_id')
 
-        start_datetime = kwargs.get('start_datetime')
-        end_datetime = kwargs.get('end_datetime')
-        status_ = kwargs.get('status')
-        cost = kwargs.get('cost')
+        start_datetime: dt | date = kwargs.get('start_datetime')
+
+        end: dt | date = kwargs.get('end_datetime')
+        end_datetime = (
+            dt(year=end.year, month=end.month, day=end.day, hour=23, minute=59, second=59)
+            if type(end) is date else end
+        )
+
+        status_: str = kwargs.get('status')
+        cost: float = kwargs.get('cost')
 
         return (
             self.db
@@ -47,7 +55,7 @@ class OrderOperation(ModelOperation):
                 .filter(and_(
                              (OrderModel.start_datetime >= start_datetime
                               if start_datetime is not None else True),
-                             (OrderModel.end_datetime >= end_datetime
+                             (OrderModel.end_datetime <= end_datetime
                               if end_datetime is not None else True),
                              (OrderModel.status == status_
                               if status_ is not None else True),
@@ -83,7 +91,18 @@ class OrderOperation(ModelOperation):
 
         # Update order data.
         data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        updated_data: OrderPatchSchema = old_order_data.copy(update=data_to_update)  # replace only changed data
+        if data_to_update:
+            updated_data: OrderPatchSchema = old_order_data.copy(update=data_to_update)  # replace only changed data
+        else:
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('err_patch_no_data')
+            )
+
+        # Check datetime values, required if only one datetime field was given.
+        OrderPostOrPatchValidator.check_datetime_values(
+            updated_data.start_datetime, updated_data.end_datetime
+        )
 
         # Update order.
         for key, value in updated_data:
@@ -143,7 +162,7 @@ class OrderOperation(ModelOperation):
                     data.end_datetime
             ):
                 raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    message="This time is already taken")
+                                    message=get_text('order_err_busy_time'))
 
     def _prepare_data_for_post_operation(self, data: OrderPostSchema) -> dict:
         """
