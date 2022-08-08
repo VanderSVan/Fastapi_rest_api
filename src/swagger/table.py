@@ -110,4 +110,4 @@ class TableOutputPost:
         "Only available to **superuser.**"
     )
     response_model: Optional[Type[Any]] = TableResponsePostSchema
-    status_code: Optional[int] = status.HTTP_200_OK
+    status_code: Optional[int] = status.HTTP_201_CREATED
