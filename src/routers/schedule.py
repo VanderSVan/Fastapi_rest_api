@@ -42,7 +42,7 @@ class Schedule:
 
     @router.get("/schedules/", **asdict(ScheduleOutputGetAll()))
     def get_all_schedules(self,
-                          schedule: ScheduleInterfaceGetAll = Depends(ScheduleInterfaceGetAll)
+                          schedule: ScheduleInterfaceGetAll = Depends()
                           ) -> list[ScheduleModel] | list[None]:
         """
         Returns all schedules from db by parameters.
@@ -67,7 +67,7 @@ class Schedule:
 
     @router.delete("/schedules/{schedule_id}", **asdict(ScheduleOutputDelete()))
     def delete_schedule(self,
-                        schedule: ScheduleInterfaceDelete = Depends(ScheduleInterfaceDelete)
+                        schedule: ScheduleInterfaceDelete = Depends()
                         ) -> JSONResponse:
         """
         Deletes schedule from db by schedule id.
@@ -83,7 +83,7 @@ class Schedule:
 
     @router.patch("/schedules/{schedule_id}", **asdict(ScheduleOutputPatch()))
     def patch_schedule(self,
-                       schedule: ScheduleInterfacePatch = Depends(ScheduleInterfacePatch)
+                       schedule: ScheduleInterfacePatch = Depends()
                        ) -> JSONResponse:
         """
         Updates schedule data.
@@ -99,7 +99,7 @@ class Schedule:
 
     @router.post("/schedules/create", **asdict(ScheduleOutputPost()))
     def add_schedule(self,
-                     schedule: ScheduleInterfacePost = Depends(ScheduleInterfacePost),
+                     schedule: ScheduleInterfacePost = Depends(),
                      ) -> JSONResponse:
         """
         Adds new schedule into db.

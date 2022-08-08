@@ -39,7 +39,7 @@ class Order:
 
     @router.get('/orders/',  **asdict(OrderOutputGetAll()))
     def get_all_orders(self,
-                       order: OrderInterfaceGetAll = Depends(OrderInterfaceGetAll)
+                       order: OrderInterfaceGetAll = Depends()
                        ) -> list[OrderModel] | list[None]:
         """
         Returns all orders from db by parameters.
@@ -86,7 +86,7 @@ class Order:
     @router.patch("/orders/{order_id}", **asdict(OrderOutputPatch()))
     def patch_order(self,
                     order_id: int = Path(..., ge=1),
-                    order: OrderInterfacePatch = Depends(OrderInterfacePatch)
+                    order: OrderInterfacePatch = Depends()
                     ) -> JSONResponse:
         """
         Updates order data.
@@ -104,7 +104,7 @@ class Order:
 
     @router.post("/orders/create", **asdict(OrderOutputPost()))
     def add_order(self,
-                  order: OrderInterfacePost = Depends(OrderInterfacePost)
+                  order: OrderInterfacePost = Depends()
                   ) -> JSONResponse:
         """
         Adds new order into db.

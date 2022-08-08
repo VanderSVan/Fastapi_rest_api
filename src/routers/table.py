@@ -42,8 +42,8 @@ class Table:
 
     @router.get("/tables/", **asdict(TableOutputGetAll()))
     def get_all_tables(self,
-                       table: TableInterfaceGetAll = Depends(TableInterfaceGetAll)
-                       ) -> list[TableModel] | list[None]:
+                       table: TableInterfaceGetAll = Depends()
+                       ) -> list[ClientTableGetSchema] | list[AdminTableGetSchema] | list[None]:
         """
         Returns all tables from db by parameters.
         Available to all confirmed users.
@@ -64,7 +64,8 @@ class Table:
         return result
 
     @router.get("/tables/{table_id}", **asdict(TableOutputGet()))
-    def get_table(self, table_id: int = Path(..., ge=1)) -> TableModel | None:
+    def get_table(self, table_id: int = Path(..., ge=1)
+                  ) -> ClientTableGetSchema | AdminTableGetSchema | None:
         """
         Returns one table from db by table id.
         Available to all confirmed users.
@@ -83,7 +84,7 @@ class Table:
 
     @router.delete("/tables/{table_id}", **asdict(TableOutputDelete()))
     def delete_table(self,
-                     table: TableInterfaceDelete = Depends(TableInterfaceDelete)
+                     table: TableInterfaceDelete = Depends()
                      ) -> JSONResponse:
         """
         Deletes table from db by table id.
@@ -99,7 +100,7 @@ class Table:
 
     @router.patch("/tables/{table_id}", **asdict(TableOutputPatch()))
     def patch_table(self,
-                    table: TableInterfacePatch = Depends(TableInterfacePatch)
+                    table: TableInterfacePatch = Depends()
                     ) -> JSONResponse:
         """
         Updates table data.
@@ -115,7 +116,7 @@ class Table:
 
     @router.post("/tables/create", **asdict(TableOutputPost()))
     def add_table(self,
-                  table: TableInterfacePost = Depends(TableInterfacePost)
+                  table: TableInterfacePost = Depends()
                   ) -> JSONResponse:
         """
         Adds new table into db.
