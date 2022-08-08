@@ -3,5 +3,4 @@
 /gg.py
 /src/utils/logger/logs/
 /.pytest_cache/
-config.py
 /tests/functional_tests/routers/.pytest_cache/
