@@ -12,13 +12,14 @@ project_dir = Path(__file__).parent.parent.parent.parent.absolute()
 sys.path.append(str(project_dir))
 
 from src.db.db_sqlalchemy import BaseModel
-from src.config import Settings
+from src.config import get_settings
 from src.models.user import UserModel
 from src.models.order import OrderModel
 from src.models.table import TableModel
 from src.models.relationships import orders_tables
 from src.models.schedule import ScheduleModel
 
+settings = get_settings()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -54,7 +55,7 @@ def run_migrations_offline() -> None:
 
     """
     # url = config.get_main_option("sqlalchemy.url")
-    url = Settings.SQLALCHEMY_DATABASE_URL
+    url = settings.get_database_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -74,7 +75,7 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = Settings.SQLALCHEMY_DATABASE_URL
+    configuration['sqlalchemy.url'] = settings.get_database_url()
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",

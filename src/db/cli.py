@@ -1,11 +1,10 @@
-import os
 import argparse
-from dotenv import load_dotenv
 
+from src.config import get_settings
 from src.db.tools.db_operations import DatabaseOperation
-from .tools.utils import PsqlDatabaseConnection
+from src.db.tools.utils import PsqlDatabaseConnection
 
-load_dotenv()
+settings = get_settings()
 
 
 def create_arguments():
@@ -33,11 +32,11 @@ def main():
     with PsqlDatabaseConnection() as conn:
         parameters = dict(
             connection=conn,
-            db_name=args.db_name if args.db_name else os.getenv("PG_DB", "your_test_db"),
-            user_name=args.user_name if args.user_name else os.getenv("PG_USER", "your_test_user"),
+            db_name=args.db_name if args.db_name else settings.PG_USER_DB or "your_really_test_db",
+            user_name=args.user_name if args.user_name else settings.PG_USER or "your_really_test_user",
             user_password=(args.user_password if args.user_password
-                           else os.getenv("PG_USER_PASSWORD", "your_test_password")),
-            role_name=args.role_name if args.role_name else os.getenv("PG_ROLE", None)
+                           else settings.PG_USER_PASSWORD or "your_really_test_password"),
+            role_name=args.role_name if args.role_name else settings.PG_ROLE
         )
         # init database
         database = DatabaseOperation(**parameters)

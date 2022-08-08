@@ -4,12 +4,13 @@ from typing import Optional
 from blake2signer import Blake2SerializerSigner, errors
 from fastapi import status
 
-from src.config import Settings
+from src.config import get_settings
 from src.utils.exceptions import JSONException
 from src.utils.responses.main import get_text
 
-signer = Blake2SerializerSigner(secret=Settings.SECRET_KEY,
-                                max_age=td(hours=int(Settings.URL_EXPIRE_HOURS)))
+settings = get_settings()
+signer = Blake2SerializerSigner(secret=settings.SECRET_KEY,
+                                max_age=td(hours=int(settings.URL_EXPIRE_HOURS)))
 
 
 class Signer:

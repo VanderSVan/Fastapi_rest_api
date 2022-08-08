@@ -8,24 +8,26 @@ from fastapi_mail import (
     ConnectionConfig,
 )
 
-from src.config import Settings
+from src.config import get_settings
 from src.services.email.utils import create_expire
 from src.utils.auth_utils.signature import Signer
 from src.utils.logger.main import logger
 from src.utils.exceptions import JSONException
 from src.utils.responses.main import get_text
 
+settings = get_settings()
+
 email_config = ConnectionConfig(
-    MAIL_USERNAME=Settings.MAIL_USERNAME,
-    MAIL_PASSWORD=Settings.MAIL_PASSWORD,
-    MAIL_FROM=Settings.MAIL_FROM,
-    MAIL_PORT=Settings.MAIL_PORT,
-    MAIL_SERVER=Settings.MAIL_SERVER,
-    MAIL_FROM_NAME=Settings.MAIL_FROM_NAME,
-    MAIL_TLS=Settings.MAIL_TLS,
-    MAIL_SSL=Settings.MAIL_SSL,
-    USE_CREDENTIALS=Settings.USE_CREDENTIALS,
-    VALIDATE_CERTS=Settings.VALIDATE_CERTS,
+    MAIL_USERNAME=settings.MAIL_USERNAME,
+    MAIL_PASSWORD=settings.MAIL_PASSWORD,
+    MAIL_FROM=settings.MAIL_FROM,
+    MAIL_PORT=settings.MAIL_PORT,
+    MAIL_SERVER=settings.MAIL_SERVER,
+    MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
+    MAIL_TLS=settings.MAIL_TLS,
+    MAIL_SSL=settings.MAIL_SSL,
+    USE_CREDENTIALS=settings.USE_CREDENTIALS,
+    VALIDATE_CERTS=settings.VALIDATE_CERTS,
     TEMPLATE_FOLDER=Path(__file__).parent / 'templates',
 )
 
