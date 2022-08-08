@@ -64,6 +64,31 @@ class ScheduleOperation(ModelOperation):
         # This is where user access is checked.
         old_schedule: ScheduleModel = self.find_by_id_or_404(id_)
 
+        # Prepare new data.
+        prepared_new_data: SchedulePatchSchema = self._prepare_data_for_patch_operation(old_schedule, new_data)
+
+        # Update schedule.
+        for key, value in prepared_new_data:
+            if hasattr(old_schedule, key):
+                setattr(old_schedule, key, value)
+
+        # Save updated schedule.
+        updated_schedule: ScheduleModel = old_schedule
+        self.db.commit()
+        self.db.refresh(updated_schedule)
+
+        return updated_schedule
+    
+    def _prepare_data_for_patch_operation(self,
+                                          old_schedule: ScheduleModel,
+                                          new_data: SchedulePatchSchema
+                                          ) -> SchedulePatchSchema:
+        """
+        Executes all necessary checks to update the schedule data.
+        :param old_schedule: data from db.
+        :param new_data: schedule update data.
+        :return: updated data.
+        """
         # Extract schedule data by scheme.
         old_schedule_data: SchedulePatchSchema = self.patch_schema(**old_schedule.__dict__)
 
@@ -84,15 +109,4 @@ class ScheduleOperation(ModelOperation):
         SchedulePostOrPatchValidator.check_break_time(
             updated_data.break_start_time, updated_data.break_end_time
         )
-
-        # Update schedule.
-        for key, value in updated_data:
-            if hasattr(old_schedule, key):
-                setattr(old_schedule, key, value)
-
-        # Save updated schedule.
-        updated_schedule: ScheduleModel = old_schedule
-        self.db.commit()
-        self.db.refresh(updated_schedule)
-
-        return updated_schedule
+        return updated_data

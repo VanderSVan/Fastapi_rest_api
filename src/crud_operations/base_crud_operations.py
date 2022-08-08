@@ -155,21 +155,11 @@ class ModelOperation:
         # This is where user access is checked.
         old_obj: BaseModel = self.find_by_id_or_404(id_)
 
-        # Extract object data by scheme.
-        old_data: BaseSchema = self.patch_schema(**old_obj.__dict__)
-
-        # Update data.
-        data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        if data_to_update:
-            updated_data: BaseSchema = old_data.copy(update=data_to_update)  # replace only changed data
-        else:
-            raise JSONException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                message=get_text('err_patch_no_data')
-            )
+        # Prepare new data.
+        prepared_new_data: BaseSchema = self._prepare_data_for_update_operation(old_obj, new_data)
 
         # Update db object.
-        for key, value in updated_data:
+        for key, value in prepared_new_data:
             if hasattr(old_obj, key):
                 setattr(old_obj, key, value)
         updated_obj: BaseModel = old_obj
@@ -227,6 +217,30 @@ class ModelOperation:
                 case _:
                     return True
         return True
+
+    def _prepare_data_for_update_operation(self,
+                                           old_obj: BaseModel,
+                                           new_data: BaseSchema
+                                           ) -> BaseSchema:
+        """
+        Executes all necessary checks to update the object data.
+        :param old_obj: data from db.
+        :param new_data: object update data.
+        :return: updated data.
+        """
+        # Extract object data by scheme.
+        old_data: BaseSchema = self.patch_schema(**old_obj.__dict__)
+
+        # Update data.
+        data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
+        if data_to_update:
+            updated_data: BaseSchema = old_data.copy(update=data_to_update)  # replace only changed data
+        else:
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('err_patch_no_data')
+            )
+        return updated_data
 
     def _check_param_name_in_model(self, param_name) -> NoReturn:
         """
