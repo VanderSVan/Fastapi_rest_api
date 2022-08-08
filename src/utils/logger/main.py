@@ -1,7 +1,7 @@
 import logging.config
 from typing import NoReturn
 
-from .settings import logger_config
+from src.utils.logger.settings import logger_config
 
 
 def set_level_for_other_loggers(excluding: list, level_name: str = 'CRITICAL') -> NoReturn:

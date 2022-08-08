@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-from ..db.db_sqlalchemy import BaseModel
-from .relationships import orders_tables
+from src.db.db_sqlalchemy import BaseModel
+from src.models.relationships import orders_tables
 
 
 class OrderModel(BaseModel):
