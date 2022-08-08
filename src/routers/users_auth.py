@@ -14,7 +14,7 @@ from src.schemes.user.base_schemes import (UserGetSchema,
 from src.schemes.user.response_schemes import (UserResponseConfirmEmailSchema,
                                                UserResponseResetPasswordSchema,
                                                UserResponseConfirmResetPasswordSchema)
-from src.schemes.jwt.response_schemes import Token
+from src.schemes.jwt.response_schemes import TokenResponseSchema
 
 from src.utils.dependencies.db import get_db
 from src.utils.dependencies.auth import get_current_confirmed_user
@@ -94,7 +94,7 @@ class UserAuth:
             content={"message": get_text('reset_password')}
         )
 
-    @router.post("/token", response_model=Token, summary='User registration')
+    @router.post("/token", response_model=TokenResponseSchema, summary='User registration')
     def create_token(self,
                      form_data: OAuth2PasswordRequestForm = Depends()
                      ) -> dict:

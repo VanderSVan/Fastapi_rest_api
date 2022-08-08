@@ -1,5 +1,5 @@
 from pydantic import BaseModel as BaseScheme
 
 
-class TokenData(BaseScheme):
+class TokenSchema(BaseScheme):
     username: str | None = None

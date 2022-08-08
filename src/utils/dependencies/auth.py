@@ -3,7 +3,7 @@ from fastapi import Depends, status
 from fastapi.security import OAuth2PasswordBearer
 
 from src.models.user import UserModel
-from src.schemes.jwt.base_shemes import TokenData
+from src.schemes.jwt.base_shemes import TokenSchema
 from src.crud_operations.user_auth import UserAuthOperation
 from src.utils.exceptions import JSONException
 from src.utils.responses.main import get_text
@@ -26,7 +26,7 @@ def get_current_user(token: str = Depends(oauth2_scheme),
             message="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    token_data = TokenData(username=username)
+    token_data = TokenSchema(username=username)
 
     return UserAuthOperation(db).find_by_param_or_404('username', token_data.username)
 
