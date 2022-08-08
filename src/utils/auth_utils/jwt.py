@@ -4,8 +4,10 @@ from datetime import timedelta as td
 from jose import jwt, JWTError
 from fastapi import status
 
-from src.config import Settings
+from src.config import get_settings
 from src.utils.exceptions import JSONException
+
+settings = get_settings()
 
 
 class JWT:
@@ -16,16 +18,16 @@ class JWT:
         data_to_encode.update({"exp": expire})
 
         return jwt.encode(data_to_encode,
-                          Settings.SECRET_KEY,
-                          algorithm=Settings.ALGORITHM
+                          settings.SECRET_KEY,
+                          algorithm=settings.ALGORITHM
                           )
 
     @classmethod
     def extract_payload_from_token(cls, token: str) -> dict:
         try:
             return jwt.decode(token,
-                              Settings.SECRET_KEY,
-                              algorithms=[Settings.ALGORITHM]
+                              settings.SECRET_KEY,
+                              algorithms=[settings.ALGORITHM]
                               )
         except JWTError:
             raise JSONException(

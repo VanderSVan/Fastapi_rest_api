@@ -24,9 +24,11 @@ from src.utils.dependencies.auth import get_current_confirmed_user
 from src.utils.responses.main import get_text
 from src.utils.auth_utils.signature import Signer
 from src.utils.auth_utils.jwt import JWT
-from src.config import Settings
+from src.config import get_settings
 from src.services.email.main import compose_email_with_action_link
 from src.crud_operations.user_auth import UserAuthOperation
+
+settings = get_settings()
 
 # Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
@@ -80,7 +82,7 @@ class UserAuth:
         email, params = compose_email_with_action_link(username=user.username,
                                                        email=user.email,
                                                        action='reset_password',
-                                                       prefix_link=Settings.RESET_PASSWORD_URL
+                                                       prefix_link=settings.RESET_PASSWORD_URL
                                                        )
         message, template_name = params
 
@@ -104,7 +106,7 @@ class UserAuth:
         :return: {'access_token': str, 'token_type': 'bearer'}
         """
         user = self.user_operation.authenticate_user(form_data.username, form_data.password)
-        access_token_expires = td(minutes=Settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = td(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = JWT.create_access_token(
             data={"sub": user.username}, expires_delta=access_token_expires
         )
@@ -129,7 +131,7 @@ class UserAuth:
         email, params = compose_email_with_action_link(username=user.username,
                                                        email=user.email,
                                                        action='confirm_email',
-                                                       prefix_link=Settings.CONFIRM_EMAIL_URL
+                                                       prefix_link=settings.CONFIRM_EMAIL_URL
                                                        )
         message, template_name = params
 

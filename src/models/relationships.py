@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 
-from ..db.db_sqlalchemy import BaseModel
+from src.db.db_sqlalchemy import BaseModel
 
 # relationship many to many
 orders_tables = Table(

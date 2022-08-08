@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Time
 
-from ..db.db_sqlalchemy import BaseModel
+from src.db.db_sqlalchemy import BaseModel
 
 
 class ScheduleModel(BaseModel):

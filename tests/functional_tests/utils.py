@@ -1,12 +1,24 @@
 from fastapi.testclient import TestClient
 
+from tests.functional_tests.test_data import users_json
+
+superuser: dict = {
+    'username': users_json[0]['username'],
+    'password': users_json[0]['password']
+}
+client_1: dict = {
+    'username': users_json[2]['username'],
+    'password': users_json[2]['password']
+}
+client_2: dict = {
+    'username': users_json[3]['username'],
+    'password': users_json[3]['password']
+}
+
 
 def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
     """Superuser"""
-    login_data = {
-        "username": 'superuser',
-        "password": '12345678',
-    }
+    login_data: dict = superuser
     r = client.post('/token', data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
@@ -16,10 +28,7 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
 
 def get_client1_token_headers(client: TestClient) -> dict[str, str]:
     """Confirmed client"""
-    login_data = {
-        "username": 'client1',
-        "password": '123654789',
-    }
+    login_data: dict = client_1
     r = client.post('/token', data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
@@ -29,10 +38,7 @@ def get_client1_token_headers(client: TestClient) -> dict[str, str]:
 
 def get_client2_token_headers(client: TestClient) -> dict[str, str]:
     """Unconfirmed client"""
-    login_data = {
-        "username": 'client2',
-        "password": '123654789',
-    }
+    login_data: dict = client_2
     r = client.post('/token', data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]

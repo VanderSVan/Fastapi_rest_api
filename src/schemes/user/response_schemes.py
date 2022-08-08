@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ...utils.responses.main import get_text
+from src.utils.responses.main import get_text
 
 
 class UserResponsePatchSchema(BaseModel):
