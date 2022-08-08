@@ -22,7 +22,7 @@ class OrderInterfaceGetAll:
     end_datetime: dt | date = Query(
         default=None,
         description="Date or datetime obj",
-        example='2022-01-01T13:00'
+        example='2022-12-31T13:00'
     )
     status: Literal['processing'] | Literal['confirmed'] = Query(
         default=None,

@@ -17,8 +17,8 @@ from src.utils.dependencies.auth import get_current_admin_or_superuser
 @dataclass
 class ScheduleInterfaceGetAll:
     day: str | date = Query(default=None, description="Weekday or date")
-    open_time: time = Query(default=None, description="HH:MM, More or equal")
-    close_time: time = Query(default=None, description="HH:MM, Less or equal")
+    open_time: time = Query(default=None, description="HH:MM, More or equal", example='08:00')
+    close_time: time = Query(default=None, description="HH:MM, Less or equal", example='20:00')
     break_start_time: time = Query(default=None, description="HH:MM, More or equal")
     break_end_time: time = Query(default=None, description="HH:MM, Less or equal")
 
