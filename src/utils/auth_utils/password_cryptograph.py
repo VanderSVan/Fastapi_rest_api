@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
 
-PASSWORD_CONTEXT = CryptContext(schemes='bcrypt')
+PASSWORD_CONTEXT = CryptContext(schemes='bcrypt', deprecated="auto")
 
 
 class PasswordCryptographer:
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # Demonstration of work:
     input_password: str = 'simple_password'
     hashed: str = PasswordCryptographer.bcrypt(input_password)
-    verified: bool = PasswordCryptographer.verify(hashed, input_password)
+    verified: bool = PasswordCryptographer.verify(input_password, hashed)
     print(f"{input_password=}\n"
           f"{hashed=}\n"
           f"length={len(hashed)}\n"

@@ -1,17 +1,11 @@
 from dataclasses import dataclass
-from datetime import datetime as dt, timedelta as td
-from math import ceil
+from datetime import datetime as dt
 from typing import NoReturn
 
 from fastapi import status
-from datetimerange import DateTimeRange
 
-from ...utils.exceptions import JSONException
-from ...models.table import TableModel
-from ...models.schedule import ScheduleModel
-from .utils import (find_daily_schedule,
-                    convert_time_range_to_datetime_range,
-                    _get_table_objects)
+from src.utils.exceptions import JSONException
+from src.utils.responses.main import get_text
 
 
 @dataclass
@@ -73,115 +67,38 @@ class OrderBaseValidator:
 
 
 @dataclass
-class OrderPatchValidator:
+class OrderPostOrPatchValidator:
     """Order post request validator class."""
     order_data: dict
 
     def validate_data(self) -> dict:
         """Main validator"""
-        self._check_datetime_values()
-        self._check_available_time_in_schedule()
-        self._transform_ids_into_table_objs()
-        return self.order_data
-
-    def _check_datetime_values(self) -> NoReturn:
-        """Base validator for start and end values"""
         start: dt = self.order_data.get('start_datetime')
         end: dt = self.order_data.get('end_datetime')
+
+        if self.check_existing_time(start, end):
+            self.check_datetime_values(start, end)
+
+        return self.order_data
+
+    @staticmethod
+    def check_existing_time(start: dt, end: dt) -> bool:
+        if start and end:
+            return True
+        return False
+
+    @staticmethod
+    def check_datetime_values(start: dt, end: dt) -> NoReturn:
+        """Base validator for start and end values"""
 
         if end == start:
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="fields 'start_datetime' and 'end_datetime' cannot be equal")
+                                message=get_text('order_err_start_equal_end'))
 
         if end < start:
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="'end' time cannot be less than 'start' time")
+                                message=get_text('order_err_end_less_start'))
 
         if start.date() != end.date():
             raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="'start' and 'end' datetime must have the same day")
-
-    def _check_available_time_in_schedule(self) -> bool:
-        """
-        Returns True if the time is within the range of the daily schedule
-        else raises JSONException
-        """
-        # get input data
-        start: dt = self.order_data.get('start_datetime')
-        end: dt = self.order_data.get('end_datetime')
-
-        # get daily schedule by date or week day
-        daily_schedule: ScheduleModel = find_daily_schedule(start.date())
-
-        # convert time schedule range to datetime schedule range
-        daily_schedule_without_break = convert_time_range_to_datetime_range(daily_schedule.open_time,
-                                                                            daily_schedule.close_time,
-                                                                            start,
-                                                                            end)
-
-        # convert break time to break datetime
-        break_schedule = convert_time_range_to_datetime_range(daily_schedule.break_start_time,
-                                                              daily_schedule.break_end_time,
-                                                              start,
-                                                              end)
-        input_time_range = DateTimeRange(start, end)
-
-        # check time ranges
-        if (
-                break_schedule in input_time_range
-                or str(input_time_range.start_datetime) in break_schedule
-                or str(input_time_range.end_datetime) in break_schedule
-        ):
-            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="The time range cannot be during the break time. "
-                                        f"In this case break time = ({break_schedule})")
-
-        elif input_time_range not in daily_schedule_without_break:
-            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="The time range must be during the daily schedule. "
-                                        f"In this case daily schedule = ({daily_schedule_without_break})")
-        else:
-            return True
-
-    def _transform_ids_into_table_objs(self) -> list:
-        """Converts integers to TableModel objects for nested model."""
-        table_ids = self.order_data.get('tables')
-        if table_ids:
-            tables: list[TableModel] = _get_table_objects(table_ids)
-            self.order_data['tables'] = tables
-        else:
-            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="Field 'tables' cannot be empty")
-        return tables
-
-
-@dataclass
-class OrderPostValidator(OrderPatchValidator):
-    """Order post request validator class."""
-    order_data: dict
-
-    def validate_data(self) -> dict:
-        """Main validator"""
-        self._check_datetime_values()
-        self._check_available_time_in_schedule()
-        tables: list[TableModel] = self._transform_ids_into_table_objs()
-        hours: int = self._round_timedelta_to_hours()
-        self._calculate_cost(hours, tables)
-        return self.order_data
-
-    def _round_timedelta_to_hours(self) -> int:
-        """
-        Round time delta to hours.
-        Cuts off seconds and milliseconds.
-        """
-        start: dt = self.order_data.get('start_datetime')
-        end: dt = self.order_data.get('end_datetime')
-        dt_delta: td = end - start
-        accurate_time_in_seconds = dt_delta.seconds / 3600
-        return ceil(accurate_time_in_seconds)
-
-    def _calculate_cost(self, hours, tables) -> NoReturn:
-        """Calculates order cost by table.price_per_hour"""
-        table_prices_per_hour: list = [table.price_per_hour for table in tables]
-        total_price: float = sum(table_prices_per_hour)
-        self.order_data['cost']: float = hours * total_price
+                                message=get_text('order_err_not_same_day'))

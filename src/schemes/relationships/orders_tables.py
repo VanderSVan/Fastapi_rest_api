@@ -12,6 +12,7 @@ class ShortOrderSchema(OrderGetSchema):
             'user_id': {'exclude': ..., },
             'id': {'exclude': ..., },
             'cost': {'exclude': ..., },
+            'tables': {'exclude': ..., }
         }
 
 

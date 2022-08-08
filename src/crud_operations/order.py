@@ -1,18 +1,20 @@
-from datetime import datetime as dt
 from typing import NoReturn
+from datetime import date, datetime as dt
 
 from fastapi import status
 from sqlalchemy import and_
-from datetimerange import DateTimeRange
 
 from src.models.order import OrderModel
 from src.models.table import TableModel
 from src.schemes.order.base_schemes import (OrderPatchSchema,
                                             OrderPostSchema)
+from src.crud_operations.base_crud_operations import ModelOperation
+from src.crud_operations.schedule import ScheduleOperation
+from src.crud_operations.table import TableOperation
+from src.crud_operations.utils import OrderUtils
+from src.schemes.validators.order import OrderPostOrPatchValidator
 from src.utils.exceptions import JSONException
 from src.utils.responses.main import get_text
-from src.crud_operations.base_crud_operations import ModelOperation
-from src.crud_operations.table import TableOperation
 
 
 class OrderOperation(ModelOperation):
@@ -27,19 +29,15 @@ class OrderOperation(ModelOperation):
         """
         Finds all orders in the db by given parameters.
         But before that it checks the user's access.
+        If it's not superuser, it only looks for orders associated with the user id.
         :param kwargs: dictionary with parameters.
         :return: orders list or an empty list if no orders were found.
         """
-        # Checking user access.
-        if not self.check_user_access():
-            user_id = self.user.id
-        else:
-            user_id = kwargs.get('user_id')
-
-        start_datetime = kwargs.get('start_datetime')
-        end_datetime = kwargs.get('end_datetime')
-        status_ = kwargs.get('status')
-        cost = kwargs.get('cost')
+        user_id: int = self.user.id if not self.check_user_access() else kwargs.get('user_id')
+        start_datetime: dt | date = kwargs.get('start_datetime')
+        end_datetime: dt = self._process_end_datetime(kwargs.get('end_datetime'))
+        status_: str = kwargs.get('status')
+        cost: float = kwargs.get('cost')
 
         return (
             self.db
@@ -47,7 +45,7 @@ class OrderOperation(ModelOperation):
                 .filter(and_(
                              (OrderModel.start_datetime >= start_datetime
                               if start_datetime is not None else True),
-                             (OrderModel.end_datetime >= end_datetime
+                             (OrderModel.end_datetime <= end_datetime
                               if end_datetime is not None else True),
                              (OrderModel.status == status_
                               if status_ is not None else True),
@@ -68,31 +66,22 @@ class OrderOperation(ModelOperation):
         :param new_data: new order data to update.
         :return: updated order.
         """
+        # Check input data.
+        self._check_input_data(new_data)
+
         # Get order object from db or raise 404 exception.
         # This is where user access is checked.
         old_order: OrderModel = self.find_by_id_or_404(id_)
 
-        # Check free time in order list.
-        if not self._check_free_time_in_orders(new_data.start_datetime, new_data.end_datetime):
-            raise JSONException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                message="This time is already taken"
-            )
-
         # Get nested tables.
-        existing_order_tables: list[TableModel] = old_order.tables
+        old_order_tables: list[TableModel] = old_order.tables
 
-        # Extract order data by scheme.
-        old_order_data: OrderPatchSchema = self.patch_schema(**old_order.__dict__)
+        # Prepare new data.
+        prepared_new_data: OrderPatchSchema = self._prepare_data_for_patch_operation(old_order, new_data)
 
-        # Update order data.
-        data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        updated_data: OrderPatchSchema = old_order_data.copy(update=data_to_update)  # replace only changed data
-
-        # Update order.
-        for key, value in updated_data:
-            self._add_or_delete_order_tables(key, value, existing_order_tables)
-
+        # Update old order object.
+        for key, value in prepared_new_data:
+            OrderUtils.add_or_delete_order_tables(key, value, old_order_tables, self.db)
             if hasattr(old_order, key):
                 setattr(old_order, key, value)
 
@@ -109,12 +98,12 @@ class OrderOperation(ModelOperation):
         :param new_data: new order data.
         :return: added order.
         """
-        if not self._check_free_time_in_orders(new_data.start_datetime, new_data.end_datetime):
-            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message="This time is already taken")
+        # Check input data
+        self._check_input_data(new_data)
 
+        prepared_data: dict = self._prepare_data_for_post_operation(new_data)
         max_order_id: int = self.get_max_id()
-        new_order: OrderModel = self.model(id=max_order_id + 1, **new_data.dict())
+        new_order: OrderModel = self.model(id=max_order_id + 1, **prepared_data)
 
         self.db.add(new_order)
         self.db.commit()
@@ -122,53 +111,93 @@ class OrderOperation(ModelOperation):
 
         return new_order
 
-    def _add_or_delete_order_tables(self,
-                                    action: str,
-                                    new_table_ids: list[int],
-                                    existing_tables: list[TableModel]
-                                    ) -> NoReturn:
+    def _check_input_data(self, data: OrderPostSchema | OrderPatchSchema) -> NoReturn:
         """
-        Adds or deletes tables from order.
-        :param action: table action - delete or add.
-        :param new_table_ids: new table numbers.
-        :param existing_tables: existing table objects.
+        Checks data for all parameters.
+        :param data: input data.
+        :raises: JSONException.
         """
-        if action == 'tables':
+        # Additional variables
+        schedule_operation: ScheduleOperation = ScheduleOperation(db=self.db, user=None)
+
+        if data.start_datetime and data.end_datetime:
+            # Check that the time range is on the schedule
+            OrderUtils.check_time_range_within_schedule_range(
+                data.start_datetime,
+                data.end_datetime,
+                schedule_operation
+            )
+            # Check that time is not busy in other orders
+            date_: date = data.start_datetime.date()
+            orders_for_day: list[OrderModel] = self.find_all_by_params(start_datetime=date_)
+            if not OrderUtils.check_free_time_in_orders(
+                    orders_for_day,
+                    data.start_datetime,
+                    data.end_datetime
+            ):
+                raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    message=get_text('order_err_busy_time'))
+
+    def _prepare_data_for_post_operation(self, data: OrderPostSchema) -> dict:
+        """
+        Converts table ids to table objects.
+        Calculates order cost.
+        :param data: input data.
+        :return: prepared data as dict.
+        """
+        table_operation: TableOperation = TableOperation(db=self.db, user=None)
+
+        if data.tables:
+            data.tables = OrderUtils.convert_ids_to_table_objs(data.tables, table_operation)
+
+        checked_data: dict = data.dict()
+        checked_data['cost'] = OrderUtils.calculate_cost(data.start_datetime,
+                                                         data.end_datetime,
+                                                         data.tables)
+        return checked_data
+
+    def _prepare_data_for_patch_operation(self,
+                                          old_data: OrderModel,
+                                          new_data: OrderPatchSchema
+                                          ) -> OrderPatchSchema:
+        """
+        Executes all necessary checks to update the order data.
+        :param old_data: data from db.
+        :param new_data: order update data.
+        :return: updated data.
+        """
+        # Extract order data by scheme.
+        old_order_data: OrderPatchSchema = self.patch_schema(**old_data.__dict__)
+
+        # Update order data.
+        data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
+        if data_to_update:
+            updated_data: OrderPatchSchema = old_order_data.copy(update=data_to_update)  # replace only changed data
+        else:
             raise JSONException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                message=get_text('err_patch').format('add_tables', 'delete_tables', 'tables')
+                message=get_text('err_patch_no_data')
             )
-        if action == 'add_tables' and new_table_ids:
-            new_tables: list[TableModel] = self._collect_new_tables(new_table_ids, existing_tables)
-            existing_tables.extend(new_tables)
 
-        elif action == 'delete_tables' and new_table_ids:
-            for table_number, table in enumerate(existing_tables):
-                if table.id in new_table_ids:
-                    del existing_tables[table_number]
+        # Check datetime values, required if only one datetime field was given.
+        OrderPostOrPatchValidator.check_datetime_values(
+            updated_data.start_datetime, updated_data.end_datetime
+        )
 
-    def _check_free_time_in_orders(self, start: dt, end: dt) -> bool:
-        """Returns True if time is free else False"""
-        input_time_range = DateTimeRange(start, end)
-        orders_for_day: list[OrderModel] = self.find_all_by_params(start_datetime=start.date())
-        occupied_orders: list[OrderModel] = [
-            order
-            for order in orders_for_day
-            if (DateTimeRange(order.start_datetime, order.end_datetime) in input_time_range)
-               or
-               (str(start) in DateTimeRange(order.start_datetime, order.end_datetime))
-               or
-               (str(end) in DateTimeRange(order.start_datetime, order.end_datetime))
-        ]
-        return False if occupied_orders else True
+        return updated_data
 
-    def _collect_new_tables(self,
-                            new_table_ids: list[int],
-                            existing_tables: list[TableModel]
-                            ) -> list[TableModel]:
-        """Creates a list with new tables excluding existing ones."""
-        table_operation = TableOperation(self.db)
-        existing_table_ids: list[int] = [table_obj.id for table_obj in existing_tables]
-        return [table_operation.find_by_id_or_404(table_id)
-                for table_id in new_table_ids
-                if table_id not in existing_table_ids]
+    @staticmethod
+    def _process_end_datetime(end: dt):
+        """
+        If date:
+            Replaces empty time values to '23:59:59'.
+            For proper search operation.
+        else:
+            Do nothing.
+        :param end: date or datetime value.
+        :return: datetime obj.
+        """
+        return (
+            dt(year=end.year, month=end.month, day=end.day, hour=23, minute=59, second=59)
+            if type(end) is date else end
+        )

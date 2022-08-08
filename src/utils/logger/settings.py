@@ -229,19 +229,19 @@ logger_config = {
 
     },
     'loggers': {
-        'pages_parser_console': {
+        'console': {
             'level': 'DEBUG',
             'handlers': ['console'],
             'propagate': False
         },
-        'pages_parser_files': {
+        'files': {
             'level': 'DEBUG',
             'handlers': ['debug_file_handler', 'info_file_handler',
                          'warning_file_handler', 'error_file_handler',
                          'critical_file_handler'],
             'propagate': False
         },
-        'pages_parser_full': {
+        'full': {
             'level': 'DEBUG',
             'handlers': ['console', 'debug_file_handler',
                          'info_file_handler', 'warning_file_handler',

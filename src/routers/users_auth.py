@@ -1,32 +1,32 @@
 from datetime import timedelta as td
-from typing import NoReturn
+from dataclasses import asdict
 
-from fastapi import Depends, BackgroundTasks, status
+from fastapi import Depends, BackgroundTasks, Path, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
-from ..models.user import UserModel
-from ..schemes.user.base_schemes import (UserGetSchema,
-                                         UserPatchSchema,
-                                         UserPostSchema,
-                                         UserResetPasswordSchema)
-from ..schemes.user.response_schemes import (UserResponseConfirmEmailSchema,
-                                             UserResponseResetPasswordSchema,
-                                             UserResponseConfirmResetPasswordSchema)
-from ..schemes.jwt.response_schemes import Token
-
-from ..crud_operations.user import UserOperation
-from ..utils.dependencies.db import get_db
-from ..utils.dependencies.auth import get_current_confirmed_user
-from ..utils.responses.main import get_text
-from ..utils.auth_utils.signature import Signer
-from ..utils.auth_utils.jwt import JWT
-from ..config import Settings
-from ..services.email.main import compose_email_with_action_link
-from ..crud_operations.user_auth import UserAuthOperation
+from src.models.user import UserModel
+from src.schemes.user.base_schemes import (UserPostSchema,
+                                           UserResetPasswordSchema)
+from src.swagger.user_auth import (
+    UserAuthOutputGetCurrentUser,
+    UserAuthOutputConfirmEmail,
+    UserAuthOutputResetPassword,
+    UserAuthOutputGetToken,
+    UserAuthOutputRegister,
+    UserAuthOutputConfirmNewPassword
+)
+from src.utils.dependencies.db import get_db
+from src.utils.dependencies.auth import get_current_confirmed_user
+from src.utils.responses.main import get_text
+from src.utils.auth_utils.signature import Signer
+from src.utils.auth_utils.jwt import JWT
+from src.config import Settings
+from src.services.email.main import compose_email_with_action_link
+from src.crud_operations.user_auth import UserAuthOperation
 
 # Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
 # So I have a prefix in each function.
@@ -40,18 +40,15 @@ class UserAuth:
     def __init__(self):
         self.user_operation = UserAuthOperation(db=self.db)
 
-    @router.get('/users/auth/me/', response_model=UserGetSchema)
+    @router.get('/users/auth/me/', **asdict(UserAuthOutputGetCurrentUser()))
     def get_current_user(self,
                          current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
                          ) -> UserModel:
-        """
-        Returns current user data.
-        :param current_confirmed_user:
-        """
+        """Returns current user data."""
         return current_confirmed_user
 
-    @router.get('/users/auth/confirm-email/{sign}/', response_model=UserResponseConfirmEmailSchema)
-    def confirm_email(self, sign: str):
+    @router.get('/users/auth/confirm-email/{sign}/', **asdict(UserAuthOutputConfirmEmail()))
+    def confirm_email(self, sign: str = Path(...)):
         """
         Request to confirm the user’s email.
         :param sign: it is encoded user data, such as a username.
@@ -64,7 +61,7 @@ class UserAuth:
             content={"message": get_text('email_confirmed')}
         )
 
-    @router.get('/users/auth/reset-password/', response_model=UserResponseResetPasswordSchema)
+    @router.get('/users/auth/reset-password/', **asdict(UserAuthOutputResetPassword()))
     def reset_password(self,
                        background_tasks: BackgroundTasks,
                        current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
@@ -97,7 +94,7 @@ class UserAuth:
             content={"message": get_text('reset_password')}
         )
 
-    @router.post("/token", response_model=Token, summary='User registration')
+    @router.post("/token", **asdict(UserAuthOutputGetToken()))
     def create_token(self,
                      form_data: OAuth2PasswordRequestForm = Depends()
                      ) -> dict:
@@ -113,9 +110,7 @@ class UserAuth:
         )
         return {"access_token": access_token, "token_type": "bearer"}
 
-    @router.post("/users/auth/register",
-                 response_model=UserGetSchema,
-                 status_code=status.HTTP_201_CREATED)
+    @router.post("/users/auth/register", **asdict(UserAuthOutputRegister()))
     def register_user(self,
                       user: UserPostSchema,
                       background_tasks: BackgroundTasks
@@ -146,7 +141,7 @@ class UserAuth:
         return new_user_obj
 
     @router.post('/users/auth/confirm-reset-password/{sign}/',
-                 response_model=UserResponseConfirmResetPasswordSchema)
+                 **asdict(UserAuthOutputConfirmNewPassword()))
     def confirm_reset_password(self,
                                sign: str,
                                new_password_data: UserResetPasswordSchema):

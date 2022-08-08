@@ -15,11 +15,14 @@ class UserOperation(ModelOperation):
 
     def find_all_by_params(self, **kwargs) -> list[UserModel]:
         phone = kwargs.get('phone')
+        status = kwargs.get('status')
         return (self.db
                     .query(UserModel)
                     .filter(and_(
                                  (UserModel.phone == phone
                                   if phone is not None else True),
+                                 (UserModel.status == status
+                                  if status is not None else True),
                                 )
                             )
                     .all())

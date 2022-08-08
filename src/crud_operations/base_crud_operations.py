@@ -36,6 +36,7 @@ class ModelOperation:
         """
         Finds all objects in the db.
         But before that it checks the user's access.
+        If it's not superuser, it only looks for data associated with the user id.
         :return: objects list or an empty list if no objects were found.
         """
         # Checking user access
@@ -55,6 +56,7 @@ class ModelOperation:
         """
         Finds the object by the given id.
         But before that it checks the user's access.
+        If it's not superuser, it only looks for data associated with the user id.
         :param id_: object id.
         :return: object or None if object not found.
         """
@@ -83,6 +85,7 @@ class ModelOperation:
         Finds the object by the given id,
         but if there is no such object, it raises an error.
         But before that it checks the user's access.
+        If it's not superuser, it only looks for data associated with the user id.
         :param id_: object id.
         :return: object or raises an error if object is not found.
         """
@@ -97,6 +100,8 @@ class ModelOperation:
     def find_by_param(self, param_name: str, param_value: Any) -> BaseModel | None:
         """
         Finds the object by the given parameter.
+        But before that it checks the user's access.
+        If it's not superuser, it only looks for data associated with the user id.
         :return: object or None if object not found.
         """
         self._check_param_name_in_model(param_name)
@@ -127,6 +132,7 @@ class ModelOperation:
         Finds the object by the given parameter,
         but if there is no such object, it raises an error.
         But before that it checks the user's access.
+        If it's not superuser, it only looks for data associated with the user id.
         :return:
         """
         # This is where user access is checked.
@@ -154,7 +160,13 @@ class ModelOperation:
 
         # Update data.
         data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None
-        updated_data: BaseSchema = old_data.copy(update=data_to_update)  # replace only changed data
+        if data_to_update:
+            updated_data: BaseSchema = old_data.copy(update=data_to_update)  # replace only changed data
+        else:
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('err_patch_no_data')
+            )
 
         # Update db object.
         for key, value in updated_data:
@@ -171,6 +183,7 @@ class ModelOperation:
     def delete_obj(self, id_: int) -> NoReturn:
         """
         Deletes object from db by the given id object.
+        If the user does not have access rights, then the error is raised.
         :param id_: object id.
         """
         # Get object from db or raise 404 exception.
