@@ -110,7 +110,7 @@ class OrderOutputPost:
     summary: Optional[str] = 'Add new order'
     description: Optional[str] = (
         "**Adds** new order into db. <br />"
-        "Available to all **confirmed users.** <br />"
+        "Available to all **confirmed users.**"
     )
     response_model: Optional[Type[Any]] = OrderResponsePostSchema
     status_code: Optional[int] = status.HTTP_201_CREATED
