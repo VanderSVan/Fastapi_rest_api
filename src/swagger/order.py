@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime as dt
 from typing import Optional, Type, Any, Literal
 
-from fastapi import Query, status
+from fastapi import Query, Body, status
 
 from src.schemes.order.base_schemes import (OrderGetSchema,
                                             OrderPatchSchema,
@@ -35,12 +35,33 @@ class OrderInterfaceGetAll:
 
 @dataclass
 class OrderInterfacePatch:
-    data: OrderPatchSchema
+    data: OrderPatchSchema = Body(..., example={
+            "start_datetime": "2022-08-08T10:00",
+            "end_datetime": "2022-08-08T12:59",
+            "user_id": 1,
+            "status": "confirmed",
+            "cost": 5000,
+            "add_tables": [
+                1, 2, 3
+            ],
+            "delete_tables": [
+                4
+            ]
+        }
+    )
 
 
 @dataclass
 class OrderInterfacePost:
-    data: OrderPostSchema
+    data: OrderPostSchema = Body(..., example={
+            "start_datetime": "2022-08-10T08:00",
+            "end_datetime": "2022-08-10T14:59",
+            "user_id": 1,
+            "tables": [
+                1, 2, 3
+            ]
+        }
+    )
 
 
 @dataclass
