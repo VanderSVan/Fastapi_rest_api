@@ -1,6 +1,6 @@
 from dataclasses import asdict
 
-from fastapi import Depends, Query, Path, status
+from fastapi import Depends, Path, status
 from fastapi.responses import JSONResponse
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
