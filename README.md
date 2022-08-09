@@ -11,10 +11,10 @@ alembic upgrade head
 ```
 
 ```commandline
-py -m src -h
+py -m src.db -h
 ```
 
 ```commandline
-uvicorn src.app:app --reload
+uvicorn src.api.app:app --reload
 ```
 

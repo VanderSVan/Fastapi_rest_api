@@ -4,7 +4,7 @@ from psycopg2 import Error
 from psycopg2.extensions import connection as psycopg2_conn
 from dotenv import load_dotenv
 
-from src.utils.logger.main import logger
+from src.utils.color_logging.main import logger
 
 from src.db.tools.utils import (
     PsqlDatabaseConnection,

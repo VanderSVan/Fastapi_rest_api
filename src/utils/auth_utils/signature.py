@@ -6,7 +6,7 @@ from fastapi import status
 
 from src.config import get_settings
 from src.utils.exceptions import JSONException
-from src.utils.responses.main import get_text
+from src.utils.response_generation.main import get_text
 
 settings = get_settings()
 signer = Blake2SerializerSigner(secret=settings.SECRET_KEY,
@@ -40,8 +40,10 @@ class Signer:
         try:
             unsigned = signer.loads(obj)
         except errors.SignedDataError as err:
-            raise JSONException(status_code=status.HTTP_400_BAD_REQUEST,
-                                message=get_text('decode_signature_fail').format(str(err)))
+            raise JSONException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=get_text('decode_signature_fail').format(str(err))
+            )
         return unsigned
 
 

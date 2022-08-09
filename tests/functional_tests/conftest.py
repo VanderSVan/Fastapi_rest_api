@@ -7,10 +7,10 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from src.db.db_sqlalchemy import BaseModel
 from src.db.tools.db_operations import PsqlDatabaseConnection, DatabaseOperation
-from src.factory_app import create_app
+from src.api.factory_app import create_app
 from src.config import get_settings
-from src.utils.dependencies.db import get_db
-from src.utils.populating_db.inserting_data_into_db import insert_data_to_db
+from src.api.dependencies.db import get_db
+from src.utils.db_populating.inserting_data_into_db import insert_data_to_db
 
 from tests.functional_tests.test_data import users_json, tables_json, schedules_json, order_json
 from tests.functional_tests.utils import (get_superuser_token_headers,

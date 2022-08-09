@@ -4,7 +4,7 @@ from psycopg2 import connect, OperationalError
 from psycopg2.extensions import connection as psycopg2_conn, ISOLATION_LEVEL_AUTOCOMMIT
 from dataclasses import dataclass
 
-from src.utils.logger.main import logger
+from src.utils.color_logging.main import logger
 from src.config import get_settings
 
 setting = get_settings()

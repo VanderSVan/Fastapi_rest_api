@@ -2,7 +2,7 @@ import argparse
 
 from src.config import get_settings
 from src.db.tools.db_operations import DatabaseOperation
-from src.db.tools.utils import PsqlDatabaseConnection
+from src.db.tools.db_operations import PsqlDatabaseConnection
 
 settings = get_settings()
 

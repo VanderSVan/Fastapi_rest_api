@@ -13,11 +13,11 @@ sys.path.append(str(project_dir))
 
 from src.db.db_sqlalchemy import BaseModel
 from src.config import get_settings
-from src.models.user import UserModel
-from src.models.order import OrderModel
-from src.models.table import TableModel
-from src.models.relationships import orders_tables
-from src.models.schedule import ScheduleModel
+from src.api.models.user import UserModel
+from src.api.models.order import OrderModel
+from src.api.models.table import TableModel
+from src.api.models.relationships import orders_tables
+from src.api.models.schedule import ScheduleModel
 
 settings = get_settings()
 

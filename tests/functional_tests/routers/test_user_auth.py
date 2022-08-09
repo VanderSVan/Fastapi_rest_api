@@ -1,4 +1,4 @@
-from src.utils.responses.main import get_text
+from src.utils.response_generation.main import get_text
 from src.utils.auth_utils.signature import Signer
 
 

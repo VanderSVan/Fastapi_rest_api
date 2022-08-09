@@ -1,6 +1,6 @@
 import pytest
 
-from src.utils.responses.main import get_text
+from src.utils.response_generation.main import get_text
 
 
 class TestSchedule:
