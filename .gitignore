@@ -1,5 +1,5 @@
 .idea
-/src/.env
+/.env
 /gg.py
 /src/utils/color_logging/logs/
 /.pytest_cache/

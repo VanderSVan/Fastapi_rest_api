@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     VALIDATE_CERTS: bool = True
 
     class Config:
-        env_file = api_dir.joinpath(".env")
+        env_file = project_dir.joinpath(".env")
         env_file_encoding = 'utf-8'
 
     def get_database_url(self) -> str:

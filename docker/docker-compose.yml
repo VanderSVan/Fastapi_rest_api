@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  postgresql_db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_USER: ${PG_SUPER_USER}
+      POSTGRES_PASSWORD: ${PG_SUPER_PASSWORD}
+    volumes:
+      - psql_db:/var/lib/postgresql/data
+    expose:
+      - ${PG_PORT}
+    env_file:
+      - ../.env
+    networks:
+      - rest_api_restaurant
+  api:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    restart: always
+    container_name: api
+    environment:
+      PG_HOST: "postgresql_db"
+    volumes:
+      - myapp:/usr/src/app
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgresql_db
+    networks:
+      - rest_api_restaurant
+
+networks:
+  rest_api_restaurant:
+    driver: bridge
+
+volumes:
+  psql_db:
+  myapp:

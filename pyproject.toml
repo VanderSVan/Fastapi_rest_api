@@ -20,6 +20,8 @@ fastapi-mail = "^1.1.4"
 passlib = "^1.7.4"
 bcrypt = "^3.2.2"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.5"
+requests = "^2.28.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
