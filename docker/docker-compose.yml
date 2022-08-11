@@ -4,6 +4,7 @@ services:
   postgresql_db:
     restart: always
     image: postgres
+    container_name: "psql-container"
     environment:
       POSTGRES_USER: ${PG_SUPER_USER}
       POSTGRES_PASSWORD: ${PG_SUPER_PASSWORD}
@@ -20,15 +21,30 @@ services:
       context: ..
       dockerfile: ./docker/Dockerfile
     restart: always
-    container_name: api
+    container_name: "api-container"
     environment:
       PG_HOST: "postgresql_db"
     volumes:
       - myapp:/usr/src/app
-    ports:
-      - '8000:8000'
+    expose:
+      - '9000'
     depends_on:
       - postgresql_db
+    networks:
+      - rest_api_restaurant
+
+  nginx:
+    image: nginx:latest
+    restart: always
+    container_name: "nginx-container"
+    depends_on:
+      - api
+      - postgresql_db
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - '8080:80'
+      - '443:443'
     networks:
       - rest_api_restaurant
 

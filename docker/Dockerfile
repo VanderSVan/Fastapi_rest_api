@@ -61,7 +61,7 @@ COPY . .
 
 EXPOSE 8000
 ENTRYPOINT /docker-entrypoint.sh $0 $@
-CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=8000", "src.api.app:app"]
+CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=9000", "src.api.app:app"]
 
 
 ## 'lint' stage runs black and isort
