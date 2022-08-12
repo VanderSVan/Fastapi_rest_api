@@ -39,8 +39,8 @@ class Settings(BaseSettings):
 
     # Configuration of sending emails:
     FRONT_URL: str = 'http://127.0.0.1:8000'
-    CONFIRM_EMAIL_URL: str = 'http://127.0.0.1:8000/confirm-email/{}/'
-    RESET_PASSWORD_URL: str = 'http://127.0.0.1:8000/reset-password/{}/'
+    CONFIRM_EMAIL_URL: str = f'{FRONT_URL}' + '/confirm-email/{}/'
+    RESET_PASSWORD_URL: str = f'{FRONT_URL}' + '/reset-password/{}/'
     MAIL_USERNAME: str = Field(..., env='MAIL_USERNAME')
     MAIL_PASSWORD: str = Field(..., env='MAIL_PASSWORD')
     MAIL_FROM: str = Field(..., env='MAIL_FROM')
