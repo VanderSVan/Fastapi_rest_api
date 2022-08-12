@@ -59,39 +59,22 @@ RUN poetry install
 WORKDIR /app
 COPY . .
 
-EXPOSE 8000
 ENTRYPOINT /docker-entrypoint.sh $0 $@
 CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=9000", "src.api.app:app"]
 
+# 'production' stage uses the clean 'python-base' stage and copyies
+# in only our runtime deps that were installed in the 'builder-base'
+FROM python-base as production
+ENV FASTAPI_ENV=production
 
-## 'lint' stage runs black and isort
-## running in check mode means build will fail if any linting errors occur
-#FROM development AS lint
-#RUN black --config ./pyproject.toml --check app tests
-#RUN isort --settings-path ./pyproject.toml --recursive --check-only
-#CMD ["tail", "-f", "/dev/null"]
-#
-#
-## 'test' stage runs our unit tests with pytest and
-## coverage.  Build will fail if test coverage is under 95%
-#FROM development AS test
-#RUN coverage run --rcfile ./pyproject.toml -m pytest ./tests
-#RUN coverage report --fail-under 95
-#
-#
-## 'production' stage uses the clean 'python-base' stage and copyies
-## in only our runtime deps that were installed in the 'builder-base'
-#FROM python-base as production
-#ENV FASTAPI_ENV=production
-#
-#COPY --from=builder-base $VENV_PATH $VENV_PATH
-#COPY ./docker/gunicorn_conf.py /gunicorn_conf.py
-#
-#COPY ./docker/docker-entrypoint.sh /docker-entrypoint.sh
-#RUN chmod +x /docker-entrypoint.sh
-#
-#COPY ./app /app
-#WORKDIR /app
-#
-#ENTRYPOINT /docker-entrypoint.sh $0 $@
-#CMD [ "gunicorn", "--worker-class uvicorn.workers.UvicornWorker", "--config /gunicorn_conf.py", "main:app"]
+COPY --from=builder-base $VENV_PATH $VENV_PATH
+
+COPY ./docker/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+WORKDIR /app
+COPY . .
+RUN rm -d -r tests/
+
+ENTRYPOINT /docker-entrypoint.sh $0 $@
+CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=9000", "src.api.app:app"]
