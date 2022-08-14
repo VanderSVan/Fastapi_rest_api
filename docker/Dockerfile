@@ -75,6 +75,8 @@ RUN chmod +x /docker-entrypoint.sh
 WORKDIR /app
 COPY . .
 RUN rm -d -r tests/
+RUN rm -d -r docker/
+RUN rm -d -r nginx/
 
 ENTRYPOINT /docker-entrypoint.sh $0 $@
 CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=9000", "src.api.app:app"]
