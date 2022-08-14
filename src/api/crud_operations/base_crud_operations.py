@@ -205,11 +205,15 @@ class ModelOperation:
 
     def check_user_access(self) -> bool:
         """
-        Checks user role.
+        First checks if the model has a 'user_id'.
+        If the model has no 'user_id' then returns True.
+        Second checks user role.
         If the user has the 'client' role,
         then he does not get access to some functional or data.
         :return: False if 'client' role or True if other.
         """
+        if not self._check_if_model_has_user_id(self.model):
+            return True
         if self.user:
             match self.user.role:
                 case 'client':
@@ -271,3 +275,7 @@ class ModelOperation:
                                                        param_name,
                                                        param_value)
         )
+
+    @staticmethod
+    def _check_if_model_has_user_id(obj: BaseModel):
+        return hasattr(obj, 'user_id')
