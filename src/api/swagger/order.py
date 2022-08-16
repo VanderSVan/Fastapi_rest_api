@@ -16,13 +16,13 @@ from src.api.schemes.order.response_schemes import (OrderResponsePatchSchema,
 class OrderInterfaceGetAll:
     start_datetime: dt | date = Query(
         default=None,
-        description="Date or datetime obj",
-        example='2022-01-01'
+        description="Start booking date or datetime",
+        example='2022-01-01T10:00'
     )
     end_datetime: dt | date = Query(
         default=None,
-        description="Date or datetime obj",
-        example='2022-12-31T13:00'
+        description="End booking date or datetime",
+        example='2022-12-31'
     )
     status: Literal['processing'] | Literal['confirmed'] = Query(
         default=None,
@@ -31,6 +31,7 @@ class OrderInterfaceGetAll:
     )
     cost: float = Query(default=None, description="Less or equal")
     user_id: int = Query(default=None, description="Client ID")
+    tables: list[int] = Query(default=None, description="List of table ids")
 
 
 @dataclass

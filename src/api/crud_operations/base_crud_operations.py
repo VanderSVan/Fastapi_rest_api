@@ -3,7 +3,7 @@ from typing import Any, NoReturn
 
 from fastapi import status
 from pydantic import BaseModel as BaseSchema
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, asc
 from sqlalchemy.orm import Session
 
 from src.db.db_sqlalchemy import BaseModel
@@ -40,15 +40,21 @@ class ModelOperation:
         :return: objects list or an empty list if no objects were found.
         """
         # Checking user access
-        if not self.check_user_access():
+        if not self.check_user_access() and self._check_if_model_has_user_id():
             found_objs: list[BaseModel] = (self
                                            .db
                                            .query(self.model)
                                            .filter(self.model.user_id == self.user.id)
+                                           .order_by(asc(self.model.id))
                                            .all()
                                            )
         else:
-            found_objs: list[BaseModel] = self.db.query(self.model).all()
+            found_objs: list[BaseModel] = (self
+                                           .db
+                                           .query(self.model)
+                                           .order_by(asc(self.model.id))
+                                           .all()
+                                           )
 
         return found_objs
 
@@ -60,7 +66,7 @@ class ModelOperation:
         :param id_: object id.
         :return: object or None if object not found.
         """
-        if not self.check_user_access():
+        if not self.check_user_access() and self._check_if_model_has_user_id():
             found_obj: BaseModel = (self
                                     .db
                                     .query(self.model)
@@ -107,7 +113,7 @@ class ModelOperation:
         self._check_param_name_in_model(param_name)
 
         # Checking user access
-        if not self.check_user_access():
+        if not self.check_user_access() and self._check_if_model_has_user_id():
             found_obj: BaseModel = (self
                                     .db
                                     .query(self.model)
@@ -205,15 +211,11 @@ class ModelOperation:
 
     def check_user_access(self) -> bool:
         """
-        First checks if the model has a 'user_id'.
-        If the model has no 'user_id' then returns True.
-        Second checks user role.
+        Checks user role.
         If the user has the 'client' role,
         then he does not get access to some functional or data.
         :return: False if 'client' role or True if other.
         """
-        if not self._check_if_model_has_user_id(self.model):
-            return True
         if self.user:
             match self.user.role:
                 case 'client':
@@ -276,6 +278,9 @@ class ModelOperation:
                                                        param_value)
         )
 
-    @staticmethod
-    def _check_if_model_has_user_id(obj: BaseModel):
-        return hasattr(obj, 'user_id')
+    def _check_if_model_has_user_id(self) -> bool:
+        """
+        Checks if the model has a 'user_id'.
+        If the model has no 'user_id' then returns False.
+        """
+        return hasattr(self.model, 'user_id')

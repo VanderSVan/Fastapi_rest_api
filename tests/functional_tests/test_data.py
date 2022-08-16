@@ -3,7 +3,7 @@
 users_json: list = [
     {
         "username": "superuser",
-        "email": "pukan1488@gmail.com",
+        "email": "superuser@example.com",
         "phone": "123456789",
         "role": "superuser",
         "id": 1,
@@ -44,7 +44,7 @@ schedules_json: list = [
         "open_time": "08:00:00",
         "close_time": "17:00:00",
         "break_start_time": "13:00:00",
-        "break_end_time": "14:00:00",
+        "break_end_time": "13:59:59",
         "id": 1
     },
     {
@@ -52,7 +52,7 @@ schedules_json: list = [
         "open_time": "08:00:00",
         "close_time": "17:00:00",
         "break_start_time": "13:00:00",
-        "break_end_time": "14:00:00",
+        "break_end_time": "13:59:59",
         "id": 2
     },
     {
@@ -68,7 +68,7 @@ schedules_json: list = [
         "open_time": "06:00:00",
         "close_time": "16:00:00",
         "break_start_time": "12:00:00",
-        "break_end_time": "13:00:00",
+        "break_end_time": "12:59:59",
         "id": 4
     },
     {
@@ -76,7 +76,7 @@ schedules_json: list = [
         "open_time": "06:00:00",
         "close_time": "16:00:00",
         "break_start_time": "12:00:00",
-        "break_end_time": "13:00:00",
+        "break_end_time": "12:59:59",
         "id": 5
     },
     {
@@ -84,7 +84,7 @@ schedules_json: list = [
         "open_time": "10:00",
         "close_time": "23:00",
         "break_start_time": "14:00",
-        "break_end_time": "15:00",
+        "break_end_time": "14:59:59",
         "id": 6
     },
     {
@@ -144,36 +144,36 @@ tables_json: list = [
 ]
 order_json: list = [
     {
-        "start_datetime": "2022-08-03T08:00",
-        "end_datetime": "2022-08-03T09:59",
+        "start_datetime": "2022-08-03T08:00:00",
+        "end_datetime": "2022-08-03T09:59:00",
         "status": "processing",
         "user_id": 2,
         "tables": [
             6
         ],
-        "cost": 15000,
+        "cost": 15000.0,
         "id": 1
     },
     {
-        "start_datetime": "2022-08-03T15:00",
-        "end_datetime": "2022-08-03T15:59",
+        "start_datetime": "2022-08-03T15:00:00",
+        "end_datetime": "2022-08-03T15:59:00",
         "status": "confirmed",
         "user_id": 3,
         "tables": [
             1, 2, 3
         ],
-        "cost": 7000,
+        "cost": 7000.0,
         "id": 2
     },
     {
-        "start_datetime": "2022-03-08T15:00",
-        "end_datetime": "2022-03-08T15:59",
+        "start_datetime": "2022-03-08T15:00:00",
+        "end_datetime": "2022-03-08T15:59:00",
         "status": "confirmed",
         "user_id": 4,
         "tables": [
             4, 5, 6
         ],
-        "cost": 26000,
+        "cost": 26000.0,
         "id": 3
     }
 ]

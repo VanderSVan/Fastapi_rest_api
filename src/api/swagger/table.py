@@ -1,12 +1,13 @@
 from dataclasses import dataclass
+from datetime import date, datetime as dt
 from typing import Optional, Type, Any
 
 from fastapi import Query, Path, Body, Depends, status
 
 from src.api.models.user import UserModel
-from src.api.schemes.table.base_schemes import (TableGetSchema,
-                                                TablePatchSchema,
+from src.api.schemes.table.base_schemes import (TablePatchSchema,
                                                 TablePostSchema)
+from src.api.schemes.relationships.orders_tables import FullTableGetSchema
 from src.api.schemes.table.response_schemes import (TableResponsePatchSchema,
                                                     TableResponseDeleteSchema,
                                                     TableResponsePostSchema)
@@ -18,6 +19,16 @@ class TableInterfaceGetAll:
     type: str = Query(default=None, description='Table type')
     number_of_seats: int = Query(default=None, description='Less or equal')
     price_per_hour: float = Query(default=None, description='Less or equal')
+    start_datetime: dt | date = Query(
+        default=None,
+        description="Start booking date or datetime",
+        example='2022-01-01T10:00'
+    )
+    end_datetime: dt | date = Query(
+        default=None,
+        description="End booking date or datetime",
+        example='2022-12-31'
+    )
 
 
 @dataclass
@@ -59,7 +70,7 @@ class TableOutputGetAll:
         "it will only return the start and end datetime."
 
     )
-    response_model: Optional[Type[Any]] = list[TableGetSchema]
+    response_model: Optional[Type[Any]] = list[FullTableGetSchema]
     status_code: Optional[int] = status.HTTP_200_OK
     response_description: str = 'List of tables'
 
@@ -75,7 +86,7 @@ class TableOutputGet:
         "Instead of a nested full order data, "
         "it will only return the start and end datetime."
     )
-    response_model: Optional[Type[Any]] = TableGetSchema
+    response_model: Optional[Type[Any]] = FullTableGetSchema
     status_code: Optional[int] = status.HTTP_200_OK
     response_description: str = 'Table data'
 
