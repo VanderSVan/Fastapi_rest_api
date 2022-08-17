@@ -2,7 +2,8 @@ import pytest
 
 from tests.functional_tests.conftest import (superuser_token,
                                              admin_token,
-                                             confirmed_client_token)
+                                             confirmed_client_token,
+                                             unconfirmed_client_token)
 
 from src.utils.response_generation.main import get_text
 
@@ -212,19 +213,26 @@ class TestUserException:
         assert 'application/json' in response.headers['Content-Type']
         assert response.json() == result_json
 
-    @pytest.mark.parametrize("json_to_send", [
+    @pytest.mark.parametrize("json_to_send_patch, json_to_send_post", [
         (
-            {
-                "username": "string",
-                "email": "user@example.com",
-                "phone": "907415594679555",
-                "role": "superuser",
-                "password": "stringst"
-            }
+                {
+                    "username": "some_username",
+                    "email": "user@example.com",
+                    "phone": "123456789",
+                    "role": "client",
+                    "status": "unconfirmed"
+                },
+                {
+                    "username": "some_username",
+                    "email": "user@example.com",
+                    "phone": "123456789",
+                    "role": "client",
+                    "password": "some_strong_password"
+                }
         )
     ])
-    def test_forbidden_request(self, json_to_send, client):
-        for token in admin_token, confirmed_client_token:
+    def test_forbidden_request(self, json_to_send_patch, json_to_send_post, client):
+        for token in admin_token, confirmed_client_token, unconfirmed_client_token:
             response_get = client.get(
                 '/users/', headers=token
             )
@@ -235,10 +243,10 @@ class TestUserException:
                 '/users/4', headers=token
             )
             response_patch = client.patch(
-                '/users/4', json=json_to_send, headers=token
+                '/users/4', json=json_to_send_patch, headers=token
             )
             response_post = client.post(
-                '/users/create', json=json_to_send, headers=token
+                '/users/create', json=json_to_send_post, headers=token
             )
             responses: tuple = (response_get, response_get_by_id, response_delete, response_patch, response_post)
             for response in responses:
