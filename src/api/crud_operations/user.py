@@ -9,8 +9,8 @@ from src.utils.auth_utils.password_cryptograph import PasswordCryptographer
 class UserOperation(ModelOperation):
     def __init__(self, db):
         self.model = UserModel
+        self.model_name = 'user'
         self.patch_schema = UserPatchSchema
-        self.response_elem_name = 'user'
         self.db = db
 
     def find_all_by_params(self, **kwargs) -> list[UserModel]:

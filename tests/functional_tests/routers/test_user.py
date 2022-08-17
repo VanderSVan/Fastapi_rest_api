@@ -1,7 +1,8 @@
 import pytest
 
-from tests.functional_tests.conftest import superuser_token
-from tests.functional_tests.conftest import confirmed_client_token
+from tests.functional_tests.conftest import (superuser_token,
+                                             admin_token,
+                                             confirmed_client_token)
 
 from src.utils.response_generation.main import get_text
 
@@ -223,23 +224,24 @@ class TestUserException:
         )
     ])
     def test_forbidden_request(self, json_to_send, client):
-        response_get = client.get(
-            '/users/', headers=confirmed_client_token
-        )
-        response_get_id = client.get(
-            '/users/4', headers=confirmed_client_token
-        )
-        response_delete = client.delete(
-            '/users/4', headers=confirmed_client_token
-        )
-        response_patch = client.patch(
-            '/users/4', json=json_to_send, headers=confirmed_client_token
-        )
-        response_post = client.post(
-            '/users/create', json=json_to_send, headers=confirmed_client_token
-        )
-        responses: tuple = (response_get, response_get_id, response_delete, response_patch, response_post)
-        for response in responses:
-            assert response.status_code == 403
-            assert 'application/json' in response.headers['Content-Type']
-            assert response.json()['message'] == get_text('forbidden_request')
+        for token in admin_token, confirmed_client_token:
+            response_get = client.get(
+                '/users/', headers=token
+            )
+            response_get_by_id = client.get(
+                '/users/4', headers=token
+            )
+            response_delete = client.delete(
+                '/users/4', headers=token
+            )
+            response_patch = client.patch(
+                '/users/4', json=json_to_send, headers=token
+            )
+            response_post = client.post(
+                '/users/create', json=json_to_send, headers=token
+            )
+            responses: tuple = (response_get, response_get_by_id, response_delete, response_patch, response_post)
+            for response in responses:
+                assert response.status_code == 403
+                assert 'application/json' in response.headers['Content-Type']
+                assert response.json()['message'] == get_text('forbidden_request')

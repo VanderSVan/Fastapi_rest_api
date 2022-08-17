@@ -12,6 +12,7 @@ from src.utils.db_populating.inserting_data_into_db import insert_data_to_db
 
 from tests.functional_tests.test_data import users_json, tables_json, schedules_json, order_json
 from tests.functional_tests.utils import (get_superuser_token_headers,
+                                          get_admin_token_headers,
                                           get_client1_token_headers,
                                           get_client2_token_headers)
 
@@ -62,6 +63,7 @@ def client(app, db_session):
             yield db_session
         finally:
             pass
+
     app.dependency_overrides[get_db] = _get_db
     with TestClient(app) as client:
         yield client
@@ -74,5 +76,6 @@ def _simple_client():
 
 
 superuser_token = get_superuser_token_headers(_simple_client())
+admin_token = get_admin_token_headers(_simple_client())
 confirmed_client_token = get_client1_token_headers(_simple_client())
 unconfirmed_client_token = get_client2_token_headers(_simple_client())

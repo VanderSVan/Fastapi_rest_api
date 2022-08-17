@@ -96,7 +96,7 @@ class TableOutputDelete:
     summary: Optional[str] = 'Delete table by table id'
     description: Optional[str] = (
         "**Deletes** table from db by **table id**. <br />"
-        "Only available to **superuser.**"
+        "Only available to **superuser or admin.**"
     )
     response_model: Optional[Type[Any]] = TableResponseDeleteSchema
     status_code: Optional[int] = status.HTTP_200_OK
@@ -107,7 +107,7 @@ class TableOutputPatch:
     summary: Optional[str] = 'Patch table by table id'
     description: Optional[str] = (
         "**Updates** table from db by **table id**. <br />"
-        "Only available to **superuser.**"
+        "Only available to **superuser or admin.**"
     )
     response_model: Optional[Type[Any]] = TableResponsePatchSchema
     status_code: Optional[int] = status.HTTP_200_OK
@@ -118,7 +118,7 @@ class TableOutputPost:
     summary: Optional[str] = 'Post table by table id'
     description: Optional[str] = (
         "**Adds** new table into db. <br />"
-        "Only available to **superuser.**"
+        "Only available to **superuser or admin.**"
     )
     response_model: Optional[Type[Any]] = TableResponsePostSchema
     status_code: Optional[int] = status.HTTP_201_CREATED

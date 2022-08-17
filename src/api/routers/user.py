@@ -20,7 +20,7 @@ from src.api.swagger.user import (
     UserOutputPost
 )
 from src.api.dependencies.db import get_db
-from src.api.dependencies.auth import get_current_admin_or_superuser
+from src.api.dependencies.auth import get_current_superuser
 from src.utils.response_generation.main import get_text
 
 # Unfortunately attribute 'prefix' in InferringRouter does not work correctly (duplicate prefix).
@@ -31,7 +31,7 @@ router = InferringRouter(tags=['user'])
 @cbv(router)
 class User:
     db: Session = Depends(get_db)
-    admin_or_superuser: UserModel = Depends(get_current_admin_or_superuser)
+    superuser: UserModel = Depends(get_current_superuser)
 
     def __init__(self):
         self.user_operation = UserOperation(db=self.db)
@@ -65,7 +65,7 @@ class User:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"message": get_text('delete').format(
-                self.user_operation.response_elem_name, user_id)}
+                self.user_operation.model_name, user_id)}
         )
 
     @router.patch("/users/{user_id}", **asdict(UserOutputPatch()))
@@ -81,7 +81,7 @@ class User:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"message": get_text('patch').format(
-                self.user_operation.response_elem_name, user.user_id)}
+                self.user_operation.model_name, user.user_id)}
         )
 
     @router.post("/users/create", **asdict(UserOutputPost()))
@@ -95,5 +95,5 @@ class User:
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content={"message": get_text('post').format(
-                self.user_operation.response_elem_name, user.id)}
+                self.user_operation.model_name, user.id)}
         )

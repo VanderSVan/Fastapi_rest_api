@@ -61,3 +61,25 @@ def get_current_admin_or_superuser(current_user: UserModel = Depends(get_current
             )
         case _:
             return current_user
+
+
+def get_current_superuser(current_user: UserModel = Depends(get_current_user)
+                          ) -> UserModel:
+    """
+    Gets the current user data from the JWT and checks the user's role.
+    If role is 'client' or 'admin' raises Forbidden exception.
+    """
+    match current_user.role:
+        case 'client':
+            raise JSONException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                message=get_text('forbidden_request')
+            )
+        case 'admin':
+            raise JSONException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                message=get_text('forbidden_request')
+            )
+        case _:
+
+            return current_user
