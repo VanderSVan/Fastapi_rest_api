@@ -41,22 +41,20 @@ class ModelOperation:
         """
         # Checking user access
         if not self.check_user_access() and self._check_if_model_has_user_id():
-            found_objs: list[BaseModel] = (self
-                                           .db
-                                           .query(self.model)
-                                           .filter(self.model.user_id == self.user.id)
-                                           .order_by(asc(self.model.id))
-                                           .all()
-                                           )
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(self.model.user_id == self.user.id)
+                    .order_by(asc(self.model.id))
+                    .all()
+                    )
         else:
-            found_objs: list[BaseModel] = (self
-                                           .db
-                                           .query(self.model)
-                                           .order_by(asc(self.model.id))
-                                           .all()
-                                           )
-
-        return found_objs
+            return (self
+                    .db
+                    .query(self.model)
+                    .order_by(asc(self.model.id))
+                    .all()
+                    )
 
     def find_by_id(self, id_: int) -> BaseModel | None:
         """
@@ -67,24 +65,23 @@ class ModelOperation:
         :return: object or None if object not found.
         """
         if not self.check_user_access() and self._check_if_model_has_user_id():
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(and_(
-                                                 self.model.id == id_,
-                                                 self.model.user_id == self.user.id
-                                                 )
-                                            )
-                                    .first()
-                                    )
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(and_(
+                                 self.model.id == id_,
+                                 self.model.user_id == self.user.id
+                                 )
+                            )
+                    .first()
+                    )
         else:
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(self.model.id == id_)
-                                    .first()
-                                    )
-        return found_obj
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(self.model.id == id_)
+                    .first()
+                    )
 
     def find_by_id_or_404(self, id_: int) -> BaseModel:
         """
@@ -100,8 +97,8 @@ class ModelOperation:
 
         if not found_obj:
             self._raise_obj_not_found(id_)
-
-        return found_obj
+        else:
+            return found_obj
 
     def find_by_param(self, param_name: str, param_value: Any) -> BaseModel | None:
         """
@@ -114,24 +111,23 @@ class ModelOperation:
 
         # Checking user access
         if not self.check_user_access() and self._check_if_model_has_user_id():
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(and_(
-                                                 getattr(self.model, param_name) == param_value,
-                                                 self.model.user_id == self.user.id
-                                                 )
-                                            )
-                                    .first()
-                                    )
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(and_(
+                                 getattr(self.model, param_name) == param_value,
+                                 self.model.user_id == self.user.id
+                                 )
+                            )
+                    .first()
+                    )
         else:
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(getattr(self.model, param_name) == param_value)
-                                    .first()
-                                    )
-        return found_obj
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(getattr(self.model, param_name) == param_value)
+                    .first()
+                    )
 
     def find_by_param_or_404(self, param_name: str, param_value: Any) -> BaseModel:
         """
@@ -146,8 +142,8 @@ class ModelOperation:
 
         if not found_obj:
             self._raise_param_not_found(param_name, param_value)
-
-        return found_obj
+        else:
+            return found_obj
 
     def update_obj(self, id_: int, new_data: BaseSchema) -> BaseModel:
         """
