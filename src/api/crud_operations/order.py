@@ -40,7 +40,7 @@ class OrderOperation(ModelOperation):
         cost: float = kwargs.get('cost')
         table_ids: list[int] = kwargs.get('tables')
 
-        subquery = (
+        subquery_for_search_by_table_ids = (
             self.db
             .query(OrderModel.id)
             .outerjoin(orders_tables)
@@ -49,25 +49,54 @@ class OrderOperation(ModelOperation):
             .scalar_subquery()
         ) if table_ids else None
 
-        return (
+        subquery_for_search_by_start_and_end = (
             self.db
-            .query(OrderModel)
+            .query(OrderModel.id)
             .filter(and_(
                          (OrderModel.end_datetime >= start_datetime
                           if start_datetime is not None else True),
                          (OrderModel.start_datetime <= end_datetime
-                          if end_datetime is not None else True),
-                         (OrderModel.status == status_
-                          if status_ is not None else True),
-                         (OrderModel.cost <= cost
-                          if cost is not None else True),
-                         (OrderModel.user_id == user_id
-                          if user_id is not None else True),
-                         (OrderModel.id.in_(subquery)
-                          if table_ids is not None else True)
-                         )
+                          if end_datetime is not None else True)
+                        )
                     )
-            .order_by(asc(self.model.id))
+            .scalar_subquery()
+        ) if (start_datetime and end_datetime) else None
+
+        return (
+            self.db
+            .query(OrderModel)
+            .filter(and_(
+                (
+                    OrderModel.id.in_(subquery_for_search_by_start_and_end)
+                    if (start_datetime and end_datetime) else True
+                ),
+                (
+                    OrderModel.start_datetime >= start_datetime
+                    if start_datetime is not None and end_datetime is None else True
+                ),
+                (
+                    OrderModel.end_datetime <= end_datetime
+                    if end_datetime is not None and start_datetime is None else True
+                ),
+                (
+                    OrderModel.status == status_
+                    if status_ is not None else True
+                ),
+                (
+                    OrderModel.cost <= cost
+                    if cost is not None else True)
+                ,
+                (
+                    OrderModel.user_id == user_id
+                    if user_id is not None else True
+                ),
+                (
+                    OrderModel.id.in_(subquery_for_search_by_table_ids)
+                    if table_ids is not None else True
+                )
+            )
+            )
+            .order_by(asc(self.model.start_datetime))
             .all()
         )
 

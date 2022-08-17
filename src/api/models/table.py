@@ -16,5 +16,5 @@ class TableModel(BaseModel):
     orders = relationship('OrderModel',
                           secondary=orders_tables,
                           back_populates='tables',
-                          order_by='asc(OrderModel.id)'
+                          order_by='asc(OrderModel.start_datetime)'
                           )

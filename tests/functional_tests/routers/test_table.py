@@ -110,6 +110,49 @@ class TestTable:
             assert 'application/json' in response.headers['Content-Type']
             assert len(response.json()) == number_of_tables
 
+    @pytest.mark.parametrize("start_dt, number_of_tables", [
+        ("2022-08-03", 4),
+        ("2022-08-03T15:00", 3),
+        ("2022-03-08", 6)
+    ])
+    def test_get_by_start_dt(self, start_dt, number_of_tables, client):
+        for token in superuser_token, admin_token:
+            response = client.get(
+                f'/tables/?start_datetime={start_dt}', headers=token
+            )
+            assert response.status_code == 200
+            assert 'application/json' in response.headers['Content-Type']
+            assert len(response.json()) == number_of_tables
+
+    @pytest.mark.parametrize("end_dt, number_of_tables", [
+        ("2022-08-03", 6),
+        ("2022-08-03T08:00", 3),
+        ("2022-03-08", 3)
+    ])
+    def test_get_by_end_dt(self, end_dt, number_of_tables, client):
+        for token in superuser_token, admin_token:
+            response = client.get(
+                f'/tables/?end_datetime={end_dt}', headers=token
+            )
+            assert response.status_code == 200
+            assert 'application/json' in response.headers['Content-Type']
+            assert len(response.json()) == number_of_tables
+
+    @pytest.mark.parametrize("start_dt, end_dt, number_of_tables", [
+        ("2022-08-03", "2022-08-03", 4),
+        ("2022-08-03T15:00", "2022-08-03T16:00", 3),
+        ("2022-08-03T08:30", "2022-08-03T09:00", 1),
+        ("2022-01-01", "2022-12-31", 6)
+    ])
+    def test_get_by_start_end_dt(self, start_dt, end_dt, number_of_tables, client):
+        for token in superuser_token, admin_token:
+            response = client.get(
+                f'/tables/?start_datetime={start_dt}&end_datetime={end_dt}', headers=token
+            )
+            assert response.status_code == 200
+            assert 'application/json' in response.headers['Content-Type']
+            assert len(response.json()) == number_of_tables
+
     # DELETE
     @pytest.mark.parametrize('token', [superuser_token, admin_token])
     def test_delete_table_by_id(self, token, client):

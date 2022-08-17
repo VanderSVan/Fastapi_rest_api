@@ -37,7 +37,7 @@ class TestOrderViaSuperUserOrAdmin:
 
     @pytest.mark.parametrize("start_dt, number_of_orders", [
         ("2022-08-03", 2),
-        ("2022-08-03T08:00", 2),
+        ("2022-08-03T15:00", 1),
         ("2022-03-08", 3)
     ])
     def test_get_order_by_start_dt(self, start_dt, number_of_orders, client):
@@ -51,7 +51,7 @@ class TestOrderViaSuperUserOrAdmin:
 
     @pytest.mark.parametrize("end_dt, number_of_orders", [
         ("2022-08-03", 3),
-        ("2022-08-03T08:00", 2),
+        ("2022-08-03T08:00", 1),
         ("2022-03-08", 1)
     ])
     def test_get_order_by_end_dt(self, end_dt, number_of_orders, client):
