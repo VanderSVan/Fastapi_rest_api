@@ -17,9 +17,9 @@ ENV PYTHONUNBUFFERED=1 \
     VENV_PATH="/opt/pysetup/.venv"
 
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+
+
 # -----------------------------------------------------------
-
-
 # 'PIP-POETRY-BASE' stage is used to install pip and poetry only
 FROM python-base as pip-poetry-base
 RUN apt-get update \
@@ -37,9 +37,9 @@ COPY ./poetry.lock ./pyproject.toml ./
 
 # And create requirements.txt file for production mode
 RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
+
+
 # -----------------------------------------------------------
-
-
 # 'POETRY-BASE' stage is used to build dependencies for development mode
 FROM python-base as poetry-base
 
@@ -53,9 +53,9 @@ RUN poetry install
 
 # install uvicorn globally to support WebSocket Nginx
 RUN pip install --no-cache-dir --target=$PIP_DEPENDS uvicorn[standard]
+
+
 # -----------------------------------------------------------
-
-
 # 'DEVELOPMENT' stage installs all dev deps and can be used to develop code.
 FROM python-base as development
 ENV FASTAPI_ENV=development
@@ -79,9 +79,9 @@ ENV PYTHONPATH=${PYTHONPATH}:$PIP_DEPENDS
 
 ENTRYPOINT /docker-entrypoint.sh $0 $@
 CMD ["uvicorn", "src.api.app:app", "--host=0.0.0.0", "--port=9000"]
+
+
 # -----------------------------------------------------------
-
-
 # 'PIP-BASE' stage is used to build dependencies for production mode
 FROM python-base as pip-base
 
@@ -91,9 +91,9 @@ RUN pip install --upgrade pip
 
 #Install dependencies and uvicorn globally. Uvicorn need for support WebSocket Nginx
 RUN pip install --no-cache-dir uvicorn[standard] -r $PYSETUP_PATH/requirements.txt
+
+
 # -----------------------------------------------------------
-
-
 # 'PRODUCTION' stage installs all dev deps and can be used to develop code.
 FROM python-base as production
 ENV FASTAPI_ENV=production
@@ -115,4 +115,3 @@ RUN rm pyproject.toml
 
 ENTRYPOINT /docker-entrypoint.sh $0 $@
 CMD ["uvicorn", "src.api.app:app", "--host=0.0.0.0", "--port=9000"]
-# -----------------------------------------------------------
