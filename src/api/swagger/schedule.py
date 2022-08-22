@@ -83,7 +83,7 @@ class ScheduleOutputDelete:
     summary: Optional[str] = 'Delete schedule by schedule id'
     description: Optional[str] = (
         "**Deletes** schedule from db by **schedule id**. <br />"
-        "Only available to **superuser.**"
+        "Only available to **superuser or admin.**"
     )
     response_model: Optional[Type[Any]] = ScheduleResponseDeleteSchema
     status_code: Optional[int] = status.HTTP_200_OK
@@ -94,7 +94,7 @@ class ScheduleOutputPatch:
     summary: Optional[str] = 'Delete schedule by schedule id'
     description: Optional[str] = (
         "**Updates** schedule from db by **schedule id**. <br />"
-        "Only available to **superuser.**"
+        "Only available to **superuser or admin.**"
     )
     response_model: Optional[Type[Any]] = ScheduleResponsePatchSchema
     status_code: Optional[int] = status.HTTP_200_OK
@@ -105,7 +105,7 @@ class ScheduleOutputPost:
     summary: Optional[str] = 'Delete schedule by schedule id'
     description: Optional[str] = (
         "**Adds** new schedule into db. <br />"
-        "Only available to **superuser.**"
+        "Only available to **superuser or admin.**"
     )
     response_model: Optional[Type[Any]] = ScheduleResponsePostSchema
     status_code: Optional[int] = status.HTTP_201_CREATED

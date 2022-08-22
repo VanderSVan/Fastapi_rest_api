@@ -10,4 +10,3 @@ README.md
 /docker/docker-compose.dev.yml
 /docker/docker-compose.prod.yml
 /docker/Dockerfile
-/LICENSE

@@ -7,6 +7,7 @@ from fastapi import status
 from src.utils.exceptions import JSONException
 from src.utils.response_generation.main import get_text
 
+
 @dataclass
 class OrderBaseValidator:
     """Base order validator class, that runs before validator schema"""

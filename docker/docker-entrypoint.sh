@@ -4,7 +4,9 @@
 set -e
 
 # Activate our virtual environment here.
-. /opt/pysetup/.venv/bin/activate
+if [[ $FASTAPI_ENV == 'development' ]]
+then . /opt/pysetup/.venv/bin/activate
+fi
 
 # Create a new database if it doesn't exists.
 python -m src.db --create_db

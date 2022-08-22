@@ -8,8 +8,7 @@ from sqlalchemy.orm import Session
 
 from src.api.models.user import UserModel
 from src.api.models.table import TableModel
-from src.api.schemes.relationships.orders_tables import (ClientTableGetSchema,
-                                                         AdminTableGetSchema)
+from src.api.schemes.relationships.orders_tables import FullTableGetSchema
 from src.api.crud_operations.table import TableOperation
 from src.api.swagger.table import (
     TableInterfaceGetAll,
@@ -43,7 +42,7 @@ class Table:
     @router.get("/tables/", **asdict(TableOutputGetAll()))
     def get_all_tables(self,
                        table: TableInterfaceGetAll = Depends()
-                       ) -> list[ClientTableGetSchema] | list[AdminTableGetSchema] | list[None]:
+                       ) -> list[TableModel] | list[dict] | list[None]:
         """
         Returns all tables from db by parameters.
         Available to all confirmed users.
@@ -54,18 +53,23 @@ class Table:
         table_objs: list[TableModel] = self.table_operation.find_all_by_params(
             type=table.type,
             number_of_seats=table.number_of_seats,
-            price_per_hour=table.price_per_hour
+            price_per_hour=table.price_per_hour,
+            start_datetime=table.start_datetime,
+            end_datetime=table.end_datetime
         )
         if not self.table_operation.check_user_access():
-            result = [ClientTableGetSchema.from_orm(table_obj) for table_obj in table_objs]
-        else:
-            result = [AdminTableGetSchema.from_orm(table_obj) for table_obj in table_objs]
+            return [
+                FullTableGetSchema.from_orm(table_obj).dict(
+                    exclude_unset=True,
+                    exclude={'orders': {'__all__': {'user_id', 'id', 'status', 'cost'}}}
+                )
+                for table_obj in table_objs
+            ]
 
-        return result
+        return table_objs
 
     @router.get("/tables/{table_id}", **asdict(TableOutputGet()))
-    def get_table(self, table_id: int = Path(..., ge=1)
-                  ) -> ClientTableGetSchema | AdminTableGetSchema | None:
+    def get_table(self, table_id: int = Path(..., ge=1)) -> TableModel | dict | None:
         """
         Returns one table from db by table id.
         Available to all confirmed users.
@@ -76,11 +80,12 @@ class Table:
         table_obj: TableModel = self.table_operation.find_by_id_or_404(table_id)
 
         if not self.table_operation.check_user_access():
-            result = ClientTableGetSchema.from_orm(table_obj)
-        else:
-            result = AdminTableGetSchema.from_orm(table_obj)
-
-        return result
+            data = FullTableGetSchema.from_orm(table_obj)
+            return data.dict(
+                exclude_unset=True,
+                exclude={'orders': {'__all__': {'user_id', 'id', 'status', 'cost'}}}
+            )
+        return table_obj
 
     @router.delete("/tables/{table_id}", **asdict(TableOutputDelete()))
     def delete_table(self,

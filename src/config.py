@@ -9,6 +9,9 @@ project_dir = api_dir.parent
 
 
 class Settings(BaseSettings):
+    # API
+    API_URL: str = '/api/v1'
+
     # Database:
     PG_SUPER_DB: str = Field(..., env='PG_SUPER_DB')
     PG_SUPER_USER: str = Field(..., env='PG_SUPER_USER')

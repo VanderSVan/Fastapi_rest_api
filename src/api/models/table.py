@@ -13,4 +13,8 @@ class TableModel(BaseModel):
     number_of_seats = Column(Integer)
     price_per_hour = Column(Float(precision=2))
 
-    orders = relationship('OrderModel', secondary=orders_tables, back_populates='tables')
+    orders = relationship('OrderModel',
+                          secondary=orders_tables,
+                          back_populates='tables',
+                          order_by='asc(OrderModel.start_datetime)'
+                          )

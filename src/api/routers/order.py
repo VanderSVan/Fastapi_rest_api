@@ -53,7 +53,8 @@ class Order:
             'end_datetime': order.end_datetime,
             'status': order.status,
             'cost': order.cost,
-            'user_id': order.user_id
+            'user_id': order.user_id,
+            'tables': order.tables
         }
         return self.order_operation.find_all_by_params(**params)
 
