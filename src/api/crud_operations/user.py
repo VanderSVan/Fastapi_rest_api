@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, asc
 
 from src.api.crud_operations.base_crud_operations import ModelOperation
 from src.api.models.user import UserModel
@@ -9,8 +9,8 @@ from src.utils.auth_utils.password_cryptograph import PasswordCryptographer
 class UserOperation(ModelOperation):
     def __init__(self, db):
         self.model = UserModel
+        self.model_name = 'user'
         self.patch_schema = UserPatchSchema
-        self.response_elem_name = 'user'
         self.db = db
 
     def find_all_by_params(self, **kwargs) -> list[UserModel]:
@@ -25,6 +25,7 @@ class UserOperation(ModelOperation):
                                   if status is not None else True),
                                 )
                             )
+                    .order_by(asc(self.model.id))
                     .all())
 
     def add_obj(self, new_user_schema: UserPostSchema) -> UserModel:

@@ -1,11 +1,9 @@
-import os
 from dataclasses import dataclass
+
 from psycopg2 import Error
 from psycopg2.extensions import connection as psycopg2_conn
-from dotenv import load_dotenv
 
 from src.utils.color_logging.main import logger
-
 from src.db.tools.utils import (
     PsqlDatabaseConnection,
     try_except_decorator
@@ -16,17 +14,18 @@ from src.db.tools.sql_operations import (
     UserSQLOperation,
     PrivilegeSQLOperation
 )
+from src.config import get_settings
 
-load_dotenv()
+setting = get_settings()
 
 
 @dataclass()
 class DatabaseOperation:
     connection: psycopg2_conn
-    db_name: str = os.getenv("PG_DB")
-    user_name: str = os.getenv("PG_USER")
-    user_password: str = os.getenv("PG_USER_PASSWORD")
-    role_name: str = os.getenv("PG_ROLE")
+    db_name: str = setting.PG_USER_DB
+    user_name: str = setting.PG_USER
+    user_password: str = setting.PG_USER_PASSWORD
+    role_name: str = setting.PG_ROLE
 
     @try_except_decorator(Error)
     def create_db(self):

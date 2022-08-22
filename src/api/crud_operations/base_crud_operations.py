@@ -3,7 +3,7 @@ from typing import Any, NoReturn
 
 from fastapi import status
 from pydantic import BaseModel as BaseSchema
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, asc
 from sqlalchemy.orm import Session
 
 from src.db.db_sqlalchemy import BaseModel
@@ -40,17 +40,21 @@ class ModelOperation:
         :return: objects list or an empty list if no objects were found.
         """
         # Checking user access
-        if not self.check_user_access():
-            found_objs: list[BaseModel] = (self
-                                           .db
-                                           .query(self.model)
-                                           .filter(self.model.user_id == self.user.id)
-                                           .all()
-                                           )
+        if not self.check_user_access() and self._check_if_model_has_user_id():
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(self.model.user_id == self.user.id)
+                    .order_by(asc(self.model.id))
+                    .all()
+                    )
         else:
-            found_objs: list[BaseModel] = self.db.query(self.model).all()
-
-        return found_objs
+            return (self
+                    .db
+                    .query(self.model)
+                    .order_by(asc(self.model.id))
+                    .all()
+                    )
 
     def find_by_id(self, id_: int) -> BaseModel | None:
         """
@@ -60,25 +64,24 @@ class ModelOperation:
         :param id_: object id.
         :return: object or None if object not found.
         """
-        if not self.check_user_access():
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(and_(
-                                                 self.model.id == id_,
-                                                 self.model.user_id == self.user.id
-                                                 )
-                                            )
-                                    .first()
-                                    )
+        if not self.check_user_access() and self._check_if_model_has_user_id():
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(and_(
+                                 self.model.id == id_,
+                                 self.model.user_id == self.user.id
+                                 )
+                            )
+                    .first()
+                    )
         else:
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(self.model.id == id_)
-                                    .first()
-                                    )
-        return found_obj
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(self.model.id == id_)
+                    .first()
+                    )
 
     def find_by_id_or_404(self, id_: int) -> BaseModel:
         """
@@ -94,8 +97,8 @@ class ModelOperation:
 
         if not found_obj:
             self._raise_obj_not_found(id_)
-
-        return found_obj
+        else:
+            return found_obj
 
     def find_by_param(self, param_name: str, param_value: Any) -> BaseModel | None:
         """
@@ -107,25 +110,24 @@ class ModelOperation:
         self._check_param_name_in_model(param_name)
 
         # Checking user access
-        if not self.check_user_access():
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(and_(
-                                                 getattr(self.model, param_name) == param_value,
-                                                 self.model.user_id == self.user.id
-                                                 )
-                                            )
-                                    .first()
-                                    )
+        if not self.check_user_access() and self._check_if_model_has_user_id():
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(and_(
+                                 getattr(self.model, param_name) == param_value,
+                                 self.model.user_id == self.user.id
+                                 )
+                            )
+                    .first()
+                    )
         else:
-            found_obj: BaseModel = (self
-                                    .db
-                                    .query(self.model)
-                                    .filter(getattr(self.model, param_name) == param_value)
-                                    .first()
-                                    )
-        return found_obj
+            return (self
+                    .db
+                    .query(self.model)
+                    .filter(getattr(self.model, param_name) == param_value)
+                    .first()
+                    )
 
     def find_by_param_or_404(self, param_name: str, param_value: Any) -> BaseModel:
         """
@@ -140,8 +142,8 @@ class ModelOperation:
 
         if not found_obj:
             self._raise_param_not_found(param_name, param_value)
-
-        return found_obj
+        else:
+            return found_obj
 
     def update_obj(self, id_: int, new_data: BaseSchema) -> BaseModel:
         """
@@ -271,3 +273,10 @@ class ModelOperation:
                                                        param_name,
                                                        param_value)
         )
+
+    def _check_if_model_has_user_id(self) -> bool:
+        """
+        Checks if the model has a 'user_id'.
+        If the model has no 'user_id' then returns False.
+        """
+        return hasattr(self.model, 'user_id')

@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
-from typing import Literal, Any
+from typing import Literal
 
 from pydantic import BaseModel, Field, root_validator
 
@@ -40,6 +40,7 @@ class OrderDeleteSchema(OrderBaseSchema):
 
 class OrderPostSchema(OrderBaseSchema):
     tables: list[int] = Field(..., ge=1)
+    status: Literal['processing'] | Literal['confirmed'] = Field('processing')
 
     @root_validator(pre=True)
     def order_base_validate(cls, values):
@@ -55,7 +56,7 @@ class OrderPostSchema(OrderBaseSchema):
 class OrderGetSchema(OrderBaseSchema):
     id: int
     status: Literal['processing'] | Literal['confirmed']
-    cost: Any
+    cost: float
     tables: list[TableGetSchema]
 
     class Config:

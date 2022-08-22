@@ -1,10 +1,19 @@
 from fastapi.testclient import TestClient
 
+from src.config import get_settings
 from tests.functional_tests.test_data import users_json
+
+setting = get_settings()
+
+api_url = setting.API_URL
 
 superuser: dict = {
     'username': users_json[0]['username'],
     'password': users_json[0]['password']
+}
+admin: dict = {
+    'username': users_json[1]['username'],
+    'password': users_json[1]['password']
 }
 client_1: dict = {
     'username': users_json[2]['username'],
@@ -19,7 +28,17 @@ client_2: dict = {
 def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
     """Superuser"""
     login_data: dict = superuser
-    r = client.post('/token', data=login_data)
+    r = client.post(f'{api_url}/token', data=login_data)
+    tokens = r.json()
+    a_token = tokens["access_token"]
+    headers = {"Authorization": f"Bearer {a_token}"}
+    return headers
+
+
+def get_admin_token_headers(client: TestClient) -> dict[str, str]:
+    """Admin"""
+    login_data: dict = admin
+    r = client.post(f'{api_url}/token', data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
@@ -29,7 +48,7 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
 def get_client1_token_headers(client: TestClient) -> dict[str, str]:
     """Confirmed client"""
     login_data: dict = client_1
-    r = client.post('/token', data=login_data)
+    r = client.post(f'{api_url}/token', data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
@@ -39,7 +58,7 @@ def get_client1_token_headers(client: TestClient) -> dict[str, str]:
 def get_client2_token_headers(client: TestClient) -> dict[str, str]:
     """Unconfirmed client"""
     login_data: dict = client_2
-    r = client.post('/token', data=login_data)
+    r = client.post(f'{api_url}/token', data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}

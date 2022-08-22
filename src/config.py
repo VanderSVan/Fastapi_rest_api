@@ -9,6 +9,9 @@ project_dir = api_dir.parent
 
 
 class Settings(BaseSettings):
+    # API
+    API_URL: str = '/api/v1'
+
     # Database:
     PG_SUPER_DB: str = Field(..., env='PG_SUPER_DB')
     PG_SUPER_USER: str = Field(..., env='PG_SUPER_USER')
@@ -39,8 +42,8 @@ class Settings(BaseSettings):
 
     # Configuration of sending emails:
     FRONT_URL: str = 'http://127.0.0.1:8000'
-    CONFIRM_EMAIL_URL: str = 'http://127.0.0.1:8000/confirm-email/{}/'
-    RESET_PASSWORD_URL: str = 'http://127.0.0.1:8000/reset-password/{}/'
+    CONFIRM_EMAIL_URL: str = f'{FRONT_URL}' + '/confirm-email/{}/'
+    RESET_PASSWORD_URL: str = f'{FRONT_URL}' + '/reset-password/{}/'
     MAIL_USERNAME: str = Field(..., env='MAIL_USERNAME')
     MAIL_PASSWORD: str = Field(..., env='MAIL_PASSWORD')
     MAIL_FROM: str = Field(..., env='MAIL_FROM')
@@ -53,7 +56,7 @@ class Settings(BaseSettings):
     VALIDATE_CERTS: bool = True
 
     class Config:
-        env_file = api_dir.joinpath(".env")
+        env_file = project_dir.joinpath(".env")
         env_file_encoding = 'utf-8'
 
     def get_database_url(self) -> str:

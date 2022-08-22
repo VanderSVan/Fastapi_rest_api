@@ -25,7 +25,9 @@
   "order_err_start_equal_end": "fields 'start_datetime' and 'end_datetime' cannot be equal.",
   "order_err_end_less_start": "'end_datetime' time cannot be less than 'start_datetime' time",
   "order_err_not_same_day": "'start_datetime' and 'end_datetime' datetime must have the same day",
-  "order_err_busy_time": "This time is already taken",
+  "order_err_busy_time": "This time is already taken for tables = {}",
+  "time_inside_break": "The time range cannot be during the break time. In this case daily schedule = ({})",
+  "time_out_of_schedule": "The time range must be during the daily schedule. In this case daily schedule = ({})",
 
   "decode_signature_fail": "Failed decrypting user data. Error = {}."
 }

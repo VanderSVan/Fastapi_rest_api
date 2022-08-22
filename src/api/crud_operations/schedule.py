@@ -1,7 +1,7 @@
 from datetime import date, datetime as dt
 
 from fastapi import status
-from sqlalchemy import and_
+from sqlalchemy import and_, asc
 
 from src.api.models.schedule import ScheduleModel
 from src.api.schemes.schedule.base_schemes import SchedulePatchSchema
@@ -15,7 +15,6 @@ class ScheduleOperation(ModelOperation):
     def __init__(self, db, user):
         self.model = ScheduleModel
         self.model_name = 'schedule'
-        self.patch_schema = SchedulePatchSchema
         self.db = db
         self.user = user
 
@@ -49,6 +48,7 @@ class ScheduleOperation(ModelOperation):
                                   if break_end_time is not None else True)
                                 )
                             )
+                    .order_by(asc(self.model.id))
                     .all()
                 )
 
@@ -78,9 +78,9 @@ class ScheduleOperation(ModelOperation):
         self.db.refresh(updated_schedule)
 
         return updated_schedule
-    
-    def _prepare_data_for_patch_operation(self,
-                                          old_schedule: ScheduleModel,
+
+    @staticmethod
+    def _prepare_data_for_patch_operation(old_schedule: ScheduleModel,
                                           new_data: SchedulePatchSchema
                                           ) -> SchedulePatchSchema:
         """
@@ -90,7 +90,7 @@ class ScheduleOperation(ModelOperation):
         :return: updated data.
         """
         # Extract schedule data by scheme.
-        old_schedule_data: SchedulePatchSchema = self.patch_schema(**old_schedule.__dict__)
+        old_schedule_data: SchedulePatchSchema = SchedulePatchSchema(**old_schedule.__dict__)
 
         # Update schedule data.
         data_to_update: dict = new_data.dict(exclude_unset=True)  # remove fields where value is None

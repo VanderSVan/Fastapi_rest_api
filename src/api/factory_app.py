@@ -8,19 +8,27 @@ from src.utils.exceptions import JSONException
 from src.utils.color_logging.main import logger
 from src.utils.db_populating.inserting_data_into_db import insert_data_to_db
 from src.db.db_sqlalchemy import SessionLocal
+from src.config import get_settings
+
+setting = get_settings()
+api_url = setting.API_URL
 
 
 def create_app(with_data: tuple = None,
                with_logger: bool = True):
 
-    application = FastAPI()
+    application = FastAPI(title='Restaurant_API',
+                          version='0.2.0',
+                          docs_url=f'{api_url}/docs',
+                          redoc_url=f'{api_url}/redoc',
+                          openapi_url=f'{api_url}/openapi.json')
 
     # Routers
-    application.include_router(users_auth.router)
-    application.include_router(user.router)
-    application.include_router(order.router)
-    application.include_router(schedule.router)
-    application.include_router(table.router)
+    application.include_router(users_auth.router, prefix=api_url)
+    application.include_router(user.router, prefix=api_url)
+    application.include_router(order.router, prefix=api_url)
+    application.include_router(schedule.router, prefix=api_url)
+    application.include_router(table.router, prefix=api_url)
 
     # Exception handlers
     @application.exception_handler(JSONException)
