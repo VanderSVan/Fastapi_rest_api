@@ -1,7 +1,8 @@
 import pytest
 
 from tests.functional_tests.test_data import order_json
-from tests.functional_tests.conftest import (superuser_token,
+from tests.functional_tests.conftest import (api_url,
+                                             superuser_token,
                                              admin_token,
                                              confirmed_client_token,
                                              unconfirmed_client_token)
@@ -14,7 +15,7 @@ class TestOrderViaSuperUserOrAdmin:
     @pytest.mark.parametrize('token', [superuser_token, admin_token])
     def test_get_all_orders(self, token, client):
         response = client.get(
-            f'/orders/', headers=token
+            f'{api_url}/orders/', headers=token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -24,7 +25,7 @@ class TestOrderViaSuperUserOrAdmin:
     def test_get_order_by_id(self, order_id, client):
         for token in superuser_token, admin_token:
             response = client.get(
-                f'/orders/{order_id}', headers=token
+                f'{api_url}/orders/{order_id}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -43,7 +44,7 @@ class TestOrderViaSuperUserOrAdmin:
     def test_get_order_by_start_dt(self, start_dt, number_of_orders, client):
         for token in superuser_token, admin_token:
             response = client.get(
-                f'/orders/?start_datetime={start_dt}', headers=token
+                f'{api_url}/orders/?start_datetime={start_dt}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -57,7 +58,7 @@ class TestOrderViaSuperUserOrAdmin:
     def test_get_order_by_end_dt(self, end_dt, number_of_orders, client):
         for token in superuser_token, admin_token:
             response = client.get(
-                f'/orders/?end_datetime={end_dt}', headers=token
+                f'{api_url}/orders/?end_datetime={end_dt}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -71,7 +72,7 @@ class TestOrderViaSuperUserOrAdmin:
     def test_get_order_by_start_end_dt(self, start_dt, end_dt, number_of_orders, client):
         for token in superuser_token, admin_token:
             response = client.get(
-                f'/orders/?start_datetime={start_dt}&end_datetime={end_dt}', headers=token
+                f'{api_url}/orders/?start_datetime={start_dt}&end_datetime={end_dt}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -84,7 +85,7 @@ class TestOrderViaSuperUserOrAdmin:
     def test_get_order_by_status(self, status, number_of_orders, client):
         for token in superuser_token, admin_token:
             response = client.get(
-                f'/orders/?status={status}', headers=token
+                f'{api_url}/orders/?status={status}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -98,7 +99,7 @@ class TestOrderViaSuperUserOrAdmin:
     def test_get_order_by_user_id(self, user_id, number_of_orders, client):
         for token in superuser_token, admin_token:
             response = client.get(
-                f'/orders/?user_id={user_id}', headers=token
+                f'{api_url}/orders/?user_id={user_id}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -117,13 +118,13 @@ class TestOrderViaSuperUserOrAdmin:
     ])
     def test_delete_order_by_id(self, order_id, result_msg, status, token, client):
         before_delete_response = client.get(
-            f'/orders/{order_id}', headers=token
+            f'{api_url}/orders/{order_id}', headers=token
         )
         main_response = client.delete(
-            f'/orders/{order_id}', headers=token
+            f'{api_url}/orders/{order_id}', headers=token
         )
         after_delete_response = client.get(
-            f'/orders/{order_id}', headers=token
+            f'{api_url}/orders/{order_id}', headers=token
         )
         response_msg = main_response.json()['message']
         assert main_response.status_code == status
@@ -160,13 +161,13 @@ class TestOrderViaSuperUserOrAdmin:
     ])
     def test_patch_order_by_id(self, order_id, json_to_send, result_json, token, client):
         before_patch_response = client.get(
-            f'/orders/{order_id}', headers=token
+            f'{api_url}/orders/{order_id}', headers=token
         )
         main_response = client.patch(
-            f'/orders/{order_id}', json=json_to_send, headers=token
+            f'{api_url}/orders/{order_id}', json=json_to_send, headers=token
         )
         after_patch_response = client.get(
-            f'/orders/{order_id}', headers=token
+            f'{api_url}/orders/{order_id}', headers=token
         )
         # process data to compare
         table_ids_before_patch = [
@@ -221,13 +222,13 @@ class TestOrderViaSuperUserOrAdmin:
     ])
     def test_post_order(self, json_to_send, result_json, token, client):
         before_post_response = client.get(
-            '/orders/', headers=token
+            f'{api_url}/orders/', headers=token
         )
         main_response = client.post(
-            '/orders/create', json=json_to_send, headers=token
+            f'{api_url}/orders/create', json=json_to_send, headers=token
         )
         after_post_response = client.get(
-            '/orders/', headers=token
+            f'{api_url}/orders/', headers=token
         )
         assert main_response.status_code == 201
         assert 'application/json' in main_response.headers['Content-Type']
@@ -239,7 +240,7 @@ class TestOrderViaConfirmedUser:
     # GET
     def test_get_all_orders(self, client):
         response = client.get(
-            f'/orders/', headers=confirmed_client_token
+            f'{api_url}/orders/', headers=confirmed_client_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -252,7 +253,7 @@ class TestOrderViaConfirmedUser:
     ])
     def test_get_order_by_id(self, order_id, result_order_id, client):
         response = client.get(
-            f'/orders/{order_id}', headers=confirmed_client_token
+            f'{api_url}/orders/{order_id}', headers=confirmed_client_token
         )
         response_id = response.json()['id'] if response.json() else None
         assert response.status_code == 200
@@ -272,7 +273,7 @@ class TestOrderViaConfirmedUser:
     ])
     def test_get_order_by_start_dt(self, start_dt, number_of_orders, client):
         response = client.get(
-            f'/orders/?start_datetime={start_dt}', headers=confirmed_client_token
+            f'{api_url}/orders/?start_datetime={start_dt}', headers=confirmed_client_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -285,7 +286,7 @@ class TestOrderViaConfirmedUser:
     ])
     def test_get_order_by_end_dt(self, end_dt, number_of_orders, client):
         response = client.get(
-            f'/orders/?end_datetime={end_dt}', headers=confirmed_client_token
+            f'{api_url}/orders/?end_datetime={end_dt}', headers=confirmed_client_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -298,7 +299,7 @@ class TestOrderViaConfirmedUser:
     ])
     def test_get_order_by_start_end_dt(self, start_dt, end_dt, number_of_orders, client):
         response = client.get(
-            f'/orders/?start_datetime={start_dt}&end_datetime={end_dt}', headers=confirmed_client_token
+            f'{api_url}/orders/?start_datetime={start_dt}&end_datetime={end_dt}', headers=confirmed_client_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -310,7 +311,7 @@ class TestOrderViaConfirmedUser:
     ])
     def test_get_order_by_status(self, status, number_of_orders, client):
         response = client.get(
-            f'/orders/?status={status}', headers=confirmed_client_token
+            f'{api_url}/orders/?status={status}', headers=confirmed_client_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -323,7 +324,7 @@ class TestOrderViaConfirmedUser:
     ])
     def test_get_order_by_user_id(self, user_id, result_user_id, client):
         response = client.get(
-            f'/orders/?user_id={user_id}', headers=confirmed_client_token
+            f'{api_url}/orders/?user_id={user_id}', headers=confirmed_client_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -338,13 +339,13 @@ class TestOrderViaConfirmedUser:
     ])
     def test_delete_order_by_id(self, order_id, result_msg, status, client):
         before_delete_response = client.get(
-            f'/orders/{order_id}', headers=confirmed_client_token
+            f'{api_url}/orders/{order_id}', headers=confirmed_client_token
         )
         main_response = client.delete(
-            f'/orders/{order_id}', headers=confirmed_client_token
+            f'{api_url}/orders/{order_id}', headers=confirmed_client_token
         )
         after_delete_response = client.get(
-            f'/orders/{order_id}', headers=confirmed_client_token
+            f'{api_url}/orders/{order_id}', headers=confirmed_client_token
         )
         response_msg = main_response.json()['message']
         assert main_response.status_code == status
@@ -379,13 +380,13 @@ class TestOrderViaConfirmedUser:
     ])
     def test_patch_order_by_id(self, order_id, json_to_send, result_json, status, client):
         before_patch_response = client.get(
-            f'/orders/{order_id}', headers=superuser_token
+            f'{api_url}/orders/{order_id}', headers=superuser_token
         )
         main_response = client.patch(
-            f'/orders/{order_id}', json=json_to_send, headers=confirmed_client_token
+            f'{api_url}/orders/{order_id}', json=json_to_send, headers=confirmed_client_token
         )
         after_patch_response = client.get(
-            f'/orders/{order_id}', headers=superuser_token
+            f'{api_url}/orders/{order_id}', headers=superuser_token
         )
         # process data to compare
         table_ids_before_patch = [
@@ -424,13 +425,13 @@ class TestOrderViaConfirmedUser:
     ])
     def test_post_order(self, json_to_send, result_json, client):
         before_post_response = client.get(
-            '/orders/', headers=superuser_token
+            f'{api_url}/orders/', headers=superuser_token
         )
         main_response = client.post(
-            '/orders/create', json=json_to_send, headers=confirmed_client_token
+            f'{api_url}/orders/create', json=json_to_send, headers=confirmed_client_token
         )
         after_post_response = client.get(
-            '/orders/', headers=superuser_token
+            f'{api_url}/orders/', headers=superuser_token
         )
         assert main_response.status_code == 201
         assert 'application/json' in main_response.headers['Content-Type']
@@ -547,7 +548,7 @@ class TestOrderException:
     def test_patch_wrong_order(self, order_id, json_to_send, result_json, status, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.patch(
-                f'/orders/{order_id}', json=json_to_send, headers=token
+                f'{api_url}/orders/{order_id}', json=json_to_send, headers=token
             )
             assert response.status_code == status
             assert 'application/json' in response.headers['Content-Type']
@@ -666,7 +667,7 @@ class TestOrderException:
     def test_post_wrong_order(self, json_to_send, result_json, status, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.post(
-                '/orders/create', json=json_to_send, headers=token
+                f'{api_url}/orders/create', json=json_to_send, headers=token
             )
             assert response.status_code == status
             assert 'application/json' in response.headers['Content-Type']
@@ -683,10 +684,10 @@ class TestOtherException:
     ])
     def test_forbidden_request(self, json_to_send, client):
         response_delete = client.delete(
-            '/orders/1', headers=confirmed_client_token
+            f'{api_url}/orders/1', headers=confirmed_client_token
         )
         response_patch = client.patch(
-            '/orders/1', json=json_to_send, headers=confirmed_client_token
+            f'{api_url}/orders/1', json=json_to_send, headers=confirmed_client_token
         )
         responses: tuple = (response_delete, response_patch)
         for response in responses:
@@ -715,19 +716,19 @@ class TestOtherException:
     ])
     def test_not_confirmed_request(self, json_to_send_patch, json_to_send_post, client):
         response_get = client.get(
-            '/orders/', headers=unconfirmed_client_token
+            f'{api_url}/orders/', headers=unconfirmed_client_token
         )
         response_get_by_id = client.get(
-            '/orders/1', headers=unconfirmed_client_token
+            f'{api_url}/orders/1', headers=unconfirmed_client_token
         )
         response_delete = client.delete(
-            '/orders/1', headers=unconfirmed_client_token
+            f'{api_url}/orders/1', headers=unconfirmed_client_token
         )
         response_patch = client.patch(
-            '/orders/1', json=json_to_send_patch, headers=unconfirmed_client_token
+            f'{api_url}/orders/1', json=json_to_send_patch, headers=unconfirmed_client_token
         )
         response_post = client.post(
-            '/orders/create', json=json_to_send_post, headers=unconfirmed_client_token
+            f'{api_url}/orders/create', json=json_to_send_post, headers=unconfirmed_client_token
         )
         responses: tuple = (response_get, response_get_by_id, response_delete, response_patch, response_post)
         for response in responses:

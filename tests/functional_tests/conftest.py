@@ -18,6 +18,7 @@ from tests.functional_tests.utils import (get_superuser_token_headers,
 
 setting = get_settings()
 
+api_url = setting.API_URL
 db_config = setting.TEST_DATABASE
 URL = setting.get_test_database_url()
 engine = create_engine(URL)

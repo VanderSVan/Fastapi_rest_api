@@ -1,6 +1,7 @@
 import pytest
 
-from tests.functional_tests.conftest import (superuser_token,
+from tests.functional_tests.conftest import (api_url,
+                                             superuser_token,
                                              admin_token,
                                              confirmed_client_token,
                                              unconfirmed_client_token)
@@ -12,7 +13,7 @@ class TestUser:
     # GET
     def test_get_all_users(self, client):
         response = client.get(
-            f'/users/', headers=superuser_token
+            f'{api_url}/users/', headers=superuser_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -20,7 +21,7 @@ class TestUser:
     @pytest.mark.parametrize("user_id", [1, 2, 3])
     def test_get_user_by_id(self, user_id, client):
         response = client.get(
-            f'/users/{user_id}', headers=superuser_token
+            f'{api_url}/users/{user_id}', headers=superuser_token
         )
         response_id = response.json()['id']
         assert response.status_code == 200
@@ -34,7 +35,7 @@ class TestUser:
     ])
     def test_get_user_by_phone(self, phone, username, client):
         response = client.get(
-            f'/users/?phone={phone}', headers=superuser_token
+            f'{api_url}/users/?phone={phone}', headers=superuser_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -46,7 +47,7 @@ class TestUser:
     ])
     def test_get_user_by_status(self, status, number_of_users, client):
         response = client.get(
-            f'/users/?status={status}', headers=superuser_token
+            f'{api_url}/users/?status={status}', headers=superuser_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -55,7 +56,7 @@ class TestUser:
     # DELETE
     def test_delete_user_by_id(self, client):
         response = client.delete(
-            '/users/4', headers=superuser_token
+            f'{api_url}/users/4', headers=superuser_token
         )
         response_msg = response.json()['message']
         assert response.status_code == 200
@@ -75,7 +76,7 @@ class TestUser:
     ])
     def test_patch_user_by_id(self, user_id, json_to_send, result_json, client):
         response = client.patch(
-            f'/users/{user_id}', json=json_to_send, headers=superuser_token
+            f'{api_url}/users/{user_id}', json=json_to_send, headers=superuser_token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -98,7 +99,7 @@ class TestUser:
     ])
     def test_post_user(self, json_to_send, result_json, client):
         response = client.post(
-            '/users/create', json=json_to_send, headers=superuser_token
+            f'{api_url}/users/create', json=json_to_send, headers=superuser_token
         )
         assert response.status_code == 201
         assert 'application/json' in response.headers['Content-Type']
@@ -149,7 +150,7 @@ class TestUserException:
     ])
     def test_patch_wrong_user(self, user_id, json_to_send, result_json, status, client):
         response = client.patch(
-            f'/users/{user_id}', json=json_to_send, headers=superuser_token
+            f'{api_url}/users/{user_id}', json=json_to_send, headers=superuser_token
         )
         assert response.status_code == status
         assert 'application/json' in response.headers['Content-Type']
@@ -207,7 +208,7 @@ class TestUserException:
     ])
     def test_post_wrong_user(self, json_to_send, result_json, status, client):
         response = client.post(
-            f'/users/create', json=json_to_send, headers=superuser_token
+            f'{api_url}/users/create', json=json_to_send, headers=superuser_token
         )
         assert response.status_code == status
         assert 'application/json' in response.headers['Content-Type']
@@ -234,19 +235,19 @@ class TestUserException:
     def test_forbidden_request(self, json_to_send_patch, json_to_send_post, client):
         for token in admin_token, confirmed_client_token, unconfirmed_client_token:
             response_get = client.get(
-                '/users/', headers=token
+                f'{api_url}/users/', headers=token
             )
             response_get_by_id = client.get(
-                '/users/4', headers=token
+                f'{api_url}/users/4', headers=token
             )
             response_delete = client.delete(
-                '/users/4', headers=token
+                f'{api_url}/users/4', headers=token
             )
             response_patch = client.patch(
-                '/users/4', json=json_to_send_patch, headers=token
+                f'{api_url}/users/4', json=json_to_send_patch, headers=token
             )
             response_post = client.post(
-                '/users/create', json=json_to_send_post, headers=token
+                f'{api_url}/users/create', json=json_to_send_post, headers=token
             )
             responses: tuple = (response_get, response_get_by_id, response_delete, response_patch, response_post)
             for response in responses:

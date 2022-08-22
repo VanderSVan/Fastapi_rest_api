@@ -1,6 +1,7 @@
 import pytest
 
-from tests.functional_tests.conftest import (superuser_token,
+from tests.functional_tests.conftest import (api_url,
+                                             superuser_token,
                                              admin_token,
                                              confirmed_client_token,
                                              unconfirmed_client_token)
@@ -14,7 +15,7 @@ class TestSchedule:
     def test_get_all_schedules(self, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/', headers=token
+                f'{api_url}/schedules/', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -28,7 +29,7 @@ class TestSchedule:
     def test_get_schedule_by_id(self, schedule_id, output_day, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/{schedule_id}', headers=token
+                f'{api_url}/schedules/{schedule_id}', headers=token
             )
             response_day = response.json()['day']
             assert response.status_code == 200
@@ -39,7 +40,7 @@ class TestSchedule:
     def test_get_by_day(self, day, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/?day={day}', headers=token
+                f'{api_url}/schedules/?day={day}', headers=token
             )
             response_day = response.json()[0]['day']
             assert response.status_code == 200
@@ -54,7 +55,7 @@ class TestSchedule:
     def test_get_by_open_time(self, open_time, number_of_schedules, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/?open_time={open_time}', headers=token
+                f'{api_url}/schedules/?open_time={open_time}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -68,7 +69,7 @@ class TestSchedule:
     def test_get_by_close_time(self, close_time, number_of_schedules, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/?close_time={close_time}', headers=token
+                f'{api_url}/schedules/?close_time={close_time}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -82,7 +83,7 @@ class TestSchedule:
     def test_get_by_break_start_time(self, break_start_time, number_of_schedules, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/?break_start_time={break_start_time}', headers=token
+                f'{api_url}/schedules/?break_start_time={break_start_time}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -96,7 +97,7 @@ class TestSchedule:
     def test_get_by_break_end_time(self, break_end_time, number_of_schedules, client):
         for token in superuser_token, admin_token, confirmed_client_token:
             response = client.get(
-                f'/schedules/?break_end_time={break_end_time}', headers=token
+                f'{api_url}/schedules/?break_end_time={break_end_time}', headers=token
             )
             assert response.status_code == 200
             assert 'application/json' in response.headers['Content-Type']
@@ -106,7 +107,7 @@ class TestSchedule:
     @pytest.mark.parametrize('token', [superuser_token, admin_token])
     def test_delete_schedule_by_id(self, token, client):
         response = client.delete(
-            '/schedules/6', headers=token
+            f'{api_url}/schedules/6', headers=token
         )
         response_msg = response.json()['message']
         assert response.status_code == 200
@@ -130,7 +131,7 @@ class TestSchedule:
     ])
     def test_patch_schedule_by_id(self, schedule_id, json_to_send, result_json, token, client):
         response = client.patch(
-            f'/schedules/{schedule_id}', json=json_to_send, headers=token
+            f'{api_url}/schedules/{schedule_id}', json=json_to_send, headers=token
         )
         assert response.status_code == 200
         assert 'application/json' in response.headers['Content-Type']
@@ -167,7 +168,7 @@ class TestSchedule:
     ])
     def test_post_schedule(self, json_to_send, result_json, token, client):
         response = client.post(
-            '/schedules/create', json=json_to_send, headers=token
+            f'{api_url}/schedules/create', json=json_to_send, headers=token
         )
         assert response.status_code == 201
         assert 'application/json' in response.headers['Content-Type']
@@ -240,7 +241,7 @@ class TestScheduleException:
     def test_patch_wrong_schedule(self, schedule_id, json_to_send, result_json, client):
         for token in superuser_token, admin_token:
             response = client.patch(
-                f'/schedules/{schedule_id}', json=json_to_send, headers=token
+                f'{api_url}/schedules/{schedule_id}', json=json_to_send, headers=token
             )
             assert response.status_code == 400
             assert 'application/json' in response.headers['Content-Type']
@@ -340,7 +341,7 @@ class TestScheduleException:
     def test_post_wrong_schedule(self, json_to_send, result_json, status, client):
         for token in superuser_token, admin_token:
             response = client.post(
-                '/schedules/create', json=json_to_send, headers=token
+                f'{api_url}/schedules/create', json=json_to_send, headers=token
             )
             assert response.status_code == status
             assert 'application/json' in response.headers['Content-Type']
@@ -361,13 +362,13 @@ class TestScheduleException:
     ])
     def test_forbidden_request(self, patch_json_to_send, post_json_to_send, client):
         response_delete = client.delete(
-            '/schedules/1', headers=confirmed_client_token
+            f'{api_url}/schedules/1', headers=confirmed_client_token
         )
         response_patch = client.patch(
-            '/schedules/1', json=patch_json_to_send, headers=confirmed_client_token
+            f'{api_url}/schedules/1', json=patch_json_to_send, headers=confirmed_client_token
         )
         response_post = client.post(
-            '/schedules/create', json=post_json_to_send, headers=confirmed_client_token
+            f'{api_url}/schedules/create', json=post_json_to_send, headers=confirmed_client_token
         )
         responses: tuple = (response_delete, response_patch, response_post)
         for response in responses:
@@ -395,19 +396,19 @@ class TestScheduleException:
     ])
     def test_not_confirmed_request(self, json_to_send_patch, json_to_send_post, client):
         response_get = client.get(
-            '/schedules/', headers=unconfirmed_client_token
+            f'{api_url}/schedules/', headers=unconfirmed_client_token
         )
         response_get_by_id = client.get(
-            '/schedules/1', headers=unconfirmed_client_token
+            f'{api_url}/schedules/1', headers=unconfirmed_client_token
         )
         response_delete = client.delete(
-            '/schedules/1', headers=unconfirmed_client_token
+            f'{api_url}/schedules/1', headers=unconfirmed_client_token
         )
         response_patch = client.patch(
-            '/schedules/1', json=json_to_send_patch, headers=unconfirmed_client_token
+            f'{api_url}/schedules/1', json=json_to_send_patch, headers=unconfirmed_client_token
         )
         response_post = client.post(
-            '/schedules/create', json=json_to_send_post, headers=unconfirmed_client_token
+            f'{api_url}/schedules/create', json=json_to_send_post, headers=unconfirmed_client_token
         )
         responses: tuple = (response_get, response_get_by_id, response_delete, response_patch, response_post)
         for response in responses:
