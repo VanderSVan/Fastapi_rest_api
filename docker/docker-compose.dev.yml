@@ -7,20 +7,19 @@ services:
       target: development
       dockerfile: ./docker/Dockerfile
     restart: always
-    container_name: "api-container"
+    container_name: "restaurant-api-dev"
     environment:
       PG_HOST: "postgresql_db"
     volumes:
-      - myapp:/usr/src/app
+      - ..:/app
     ports:
       - '9000:9000'
     depends_on:
       - ./docker-compose.base.yml./postgresql_db
     networks:
-      - rest_api_restaurant
+      - restaurant_network
     env_file:
       - ../.env
 
 volumes:
-  psql_db:
-  myapp:
+  restaurant-db:

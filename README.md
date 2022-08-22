@@ -18,3 +18,5 @@ py -m src.db -h
 uvicorn src.api.app:app --reload
 ```
 
+![Flask](https://img.shields.io/badge/SQLAlchemy-red?style=for-the-badge)
+
