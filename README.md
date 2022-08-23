@@ -87,7 +87,6 @@ This application is designed to manage the data of restaurant.
    
     **Gets** user token by entering your username and password.
     **Accessible to all.**
-    `sign`: it is encoded user data, such as a username.
     ```json
     {
       "access_token": "string",
@@ -103,7 +102,6 @@ This application is designed to manage the data of restaurant.
    
     **Gets** new user data and saves it into db.
     **Accessible to all.**
-    `sign`: it is encoded user data, such as a username.
     ```json
     {
       "username": "string",
@@ -210,7 +208,11 @@ This application is designed to manage the data of restaurant.
 
     ```json
     {
-      "message": "user with id=1 was successfully deleted."
+      "username": "some_username",
+      "email": "user@example.com",
+      "phone": "123456789",
+      "role": "client",
+      "status": "unconfirmed"
     }
     ```
     </details>
