@@ -1,0 +1,6 @@
+.idea
+/.env
+/gg.py
+/src/utils/color_logging/logs/
+/.pytest_cache/
+/tests/functional_tests/routers/.pytest_cache/

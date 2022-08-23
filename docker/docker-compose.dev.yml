@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ..
+      target: development
+      dockerfile: ./docker/Dockerfile
+    restart: always
+    container_name: "restaurant-api-dev"
+    environment:
+      PG_HOST: "postgresql_db"
+    volumes:
+      - ..:/app
+    ports:
+      - '9000:9000'
+    depends_on:
+      - ./docker-compose.base.yml./postgresql_db
+    networks:
+      - restaurant_network
+    env_file:
+      - ../.env
+
+volumes:
+  restaurant-db:
