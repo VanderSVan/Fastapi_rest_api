@@ -90,7 +90,7 @@ class UserOutputPatch:
 
 @dataclass
 class UserOutputPost:
-    summary: Optional[str] = 'Post user by user id'
+    summary: Optional[str] = 'Add new user'
     description: Optional[str] = (
         "**Adds** new user into db. <br />"
         "Only available to **superuser.**"

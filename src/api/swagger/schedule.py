@@ -91,7 +91,7 @@ class ScheduleOutputDelete:
 
 @dataclass
 class ScheduleOutputPatch:
-    summary: Optional[str] = 'Delete schedule by schedule id'
+    summary: Optional[str] = 'Patch schedule by schedule id'
     description: Optional[str] = (
         "**Updates** schedule from db by **schedule id**. <br />"
         "Only available to **superuser or admin.**"
@@ -102,7 +102,7 @@ class ScheduleOutputPatch:
 
 @dataclass
 class ScheduleOutputPost:
-    summary: Optional[str] = 'Delete schedule by schedule id'
+    summary: Optional[str] = 'Add new schedule'
     description: Optional[str] = (
         "**Adds** new schedule into db. <br />"
         "Only available to **superuser or admin.**"
