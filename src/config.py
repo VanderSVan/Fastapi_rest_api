@@ -58,6 +58,8 @@ class Settings(BaseSettings):
     # REDIS related settings
     REDIS_HOST: str = Field(..., env='REDIS_HOST')
     REDIS_PORT: str = Field(..., env='REDIS_PORT')
+    REDIS_PASSWORD: str = Field(..., env='REDIS_PASSWORD')
+    REDIS_DB_NUMBER: int = 0
 
     # CELERY related settings
     CELERY_BROKER_TRANSPORT_OPTIONS: dict = {'visibility_timeout': 3600}
@@ -74,7 +76,7 @@ class Settings(BaseSettings):
         Gets the full path to the database.
         :return: URL string.
         """
-        url: str = (
+        return (
             f'postgresql+psycopg2://'
             f'{self.PG_USER}:'
             f'{self.PG_USER_PASSWORD}@'
@@ -82,14 +84,13 @@ class Settings(BaseSettings):
             f'{self.PG_PORT}/'
             f'{self.PG_USER_DB}'
         )
-        return url
 
     def get_test_database_url(self) -> str:
         """
         Gets the full path to the test database.
         :return: URL string.
         """
-        url: str = (
+        return (
             f"postgresql+psycopg2://"
             f"{self.TEST_DATABASE['username']}:"
             f"{self.TEST_DATABASE['user_password']}@"
@@ -97,7 +98,19 @@ class Settings(BaseSettings):
             f"{self.PG_PORT}/"
             f"{self.TEST_DATABASE['db_name']}"
         )
-        return url
+
+    def get_redis_url(self) -> str:
+        """
+        Gets the full path to the redis database.
+        :return: URL string.
+        """
+        return (
+            f"redis://:"
+            f"{self.REDIS_PASSWORD}@"
+            f"{self.REDIS_HOST}:"
+            f"{self.REDIS_PORT}/"
+            f"{self.REDIS_DB_NUMBER}"
+        )
 
 
 @lru_cache()
