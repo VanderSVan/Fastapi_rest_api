@@ -17,6 +17,18 @@ services:
     env_file:
       - ../.env
 
+  redis:
+    container_name: "restaurant-redis"
+    restart: always
+    image: redis:7-alpine
+    depends_on:
+      - backend
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    expose:
+      - ${REDIS_PORT}
+    networks:
+      - restaurant_network
+
   nginx:
     container_name: "restaurant-nginx"
     restart: always

@@ -87,7 +87,7 @@ COPY --from=pip-poetry-base $PYSETUP_PATH $PYSETUP_PATH
 
 #Install dependencies and uvicorn globally. Uvicorn need for support WebSocket Nginx
 RUN pip install --upgrade pip &&  \
-    pip install --no-cache-dir uvicorn[standard] -r $PYSETUP_PATH/requirements.txt
+    pip install --no-cache-dir -r $PYSETUP_PATH/requirements.txt
 
 
 # -----------------------------------------------------------
@@ -109,6 +109,3 @@ RUN rm -d -r tests/ \
     && rm -d -r nginx/ \
     && rm poetry.lock \
     && rm pyproject.toml
-
-ENTRYPOINT /docker-entrypoint.sh $0 $@
-CMD ["uvicorn", "src.api.app:app", "--host=0.0.0.0", "--port=9000"]
