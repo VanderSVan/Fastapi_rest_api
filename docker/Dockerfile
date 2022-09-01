@@ -78,9 +78,6 @@ COPY . .
 # Add pip dependencies path to env
 ENV PYTHONPATH=${PYTHONPATH}:$PIP_DEPENDS
 
-ENTRYPOINT /docker-entrypoint.sh $0 $@
-CMD ["uvicorn", "src.api.app:app", "--host=0.0.0.0", "--port=9000"]
-
 
 # -----------------------------------------------------------
 # 'PIP-BASE' stage is used to build dependencies for production mode

@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
     # Configuration of sending emails:
-    FRONT_URL: str = 'http://127.0.0.1:8000'
+    FRONT_URL: str = 'http://0.0.0.0:8000'
     CONFIRM_EMAIL_URL: str = f'{FRONT_URL}' + '/confirm-email/{}/'
     RESET_PASSWORD_URL: str = f'{FRONT_URL}' + '/reset-password/{}/'
     MAIL_USERNAME: str = Field(..., env='MAIL_USERNAME')
@@ -54,6 +54,16 @@ class Settings(BaseSettings):
     MAIL_SSL: bool = False
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
+
+    # REDIS related settings
+    REDIS_HOST: str = Field(..., env='REDIS_HOST')
+    REDIS_PORT: str = Field(..., env='REDIS_PORT')
+
+    # CELERY related settings
+    CELERY_BROKER_TRANSPORT_OPTIONS: dict = {'visibility_timeout': 3600}
+    CELERY_ACCEPT_CONTENT: list = ['application/json']
+    CELERY_TASK_SERIALIZER: str = 'json'
+    CELERY_RESULT_SERIALIZER: str = 'json'
 
     class Config:
         env_file = project_dir.joinpath(".env")

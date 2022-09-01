@@ -1,25 +1,76 @@
 version: '3.9'
 
 services:
-  api:
+  backend:
+    container_name: "restaurant-backend-dev"
+    restart: always
     build:
       context: ..
       target: development
       dockerfile: ./docker/Dockerfile
-    restart: always
-    container_name: "restaurant-api-dev"
+    depends_on:
+      - postgresql_db
     environment:
       PG_HOST: "postgresql_db"
+    entrypoint: /docker-entrypoint.sh
+    command: bash -c "uvicorn src.api.app:app --host=0.0.0.0 --port=9000"
     volumes:
       - ..:/app
     ports:
       - '9000:9000'
-    depends_on:
-      - ./docker-compose.base.yml./postgresql_db
     networks:
       - restaurant_network
     env_file:
       - ../.env
 
-volumes:
-  restaurant-db:
+  redis:
+    container_name: "redis-dev"
+    restart: always
+    image: redis:7-alpine
+    depends_on:
+      - backend
+    ports:
+      - '6379:6379'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - restaurant_network
+
+  celery_worker:
+    container_name: "celery-worker-dev"
+    restart: always
+    build:
+      context: ..
+      target: development
+      dockerfile: ./docker/Dockerfile
+    depends_on:
+      - backend
+      - redis
+    environment:
+      PG_HOST: "postgresql_db"
+    command: python -m celery -A src.utils.celery.celery_config worker -l DEBUG --logfile=src/utils/color_logging/logs/celery_dev.log
+    volumes:
+      - ..:/app
+    networks:
+      - restaurant_network
+    env_file:
+      - ../.env
+
+  flower:
+    container_name: "flower-dev"
+    restart: always
+    build:
+      context: ..
+      target: development
+      dockerfile: ./docker/Dockerfile
+    depends_on:
+      - backend
+      - redis
+      - celery_worker
+    command: python -m celery -A src.utils.celery.celery_config flower --url_prefix=flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD}
+    ports:
+      - '5555:5555'
+    networks:
+      - restaurant_network
+    env_file:
+      - ../.env

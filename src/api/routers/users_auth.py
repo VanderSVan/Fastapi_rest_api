@@ -1,13 +1,14 @@
 from datetime import timedelta as td
 from dataclasses import asdict
 
-from fastapi import Depends, BackgroundTasks, Path, status
+from fastapi import Depends, Path, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from sqlalchemy.orm import Session
 
+from src.config import get_settings
 from src.api.models.user import UserModel
 from src.api.schemes.user.base_schemes import (UserPostSchema,
                                                UserResetPasswordSchema)
@@ -19,14 +20,13 @@ from src.api.swagger.user_auth import (
     UserAuthOutputRegister,
     UserAuthOutputConfirmNewPassword
 )
+from src.api.crud_operations.user_auth import UserAuthOperation
 from src.api.dependencies.db import get_db
 from src.api.dependencies.auth import get_current_confirmed_user
 from src.utils.response_generation.main import get_text
 from src.utils.auth_utils.signature import Signer
 from src.utils.auth_utils.jwt import JWT
-from src.config import get_settings
-from src.utils.composing_email.main import compose_email_with_action_link
-from src.api.crud_operations.user_auth import UserAuthOperation
+from src.utils.celery.celery_tasks import send_email
 
 settings = get_settings()
 
@@ -65,32 +65,23 @@ class UserAuth:
 
     @router.get('/users/auth/reset-password/', **asdict(UserAuthOutputResetPassword()))
     def reset_password(self,
-                       background_tasks: BackgroundTasks,
                        current_confirmed_user: UserModel = Depends(get_current_confirmed_user)
                        ):
         """
         Request to reset the user’s password.
         The user must be in authenticated status else he cannot access this endpoint.
         It then sends an email to the user to reset the password.
-        :param background_tasks: task that runs in the background.
         :param current_confirmed_user: user data.
         """
         # 1. Find user into db
         user: UserModel = self.user_operation.find_by_id_or_404(current_confirmed_user.id)
 
-        # 2. Compose email with action link
-        email, params = compose_email_with_action_link(username=user.username,
-                                                       email=user.email,
-                                                       action='reset_password',
-                                                       prefix_link=settings.RESET_PASSWORD_URL
-                                                       )
-        message, template_name = params
-
-        # 3. Start sending letter to email with background task.
-        background_tasks.add_task(email.send_message,
-                                  message=message,
-                                  template_name=template_name,
-                                  )
+        # 2. Compose email with action link and
+        # start sending letter to email with celery.
+        send_email.delay(username=user.username,
+                         email=user.email,
+                         action='reset_password'
+                         )
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"message": get_text('reset_password')}
@@ -114,32 +105,23 @@ class UserAuth:
 
     @router.post("/users/auth/register", **asdict(UserAuthOutputRegister()))
     def register_user(self,
-                      user: UserPostSchema,
-                      background_tasks: BackgroundTasks
+                      user: UserPostSchema
                       ) -> UserModel:
         """
         Gets new user data and saves it into db.
         It then sends an email to the user to confirm the password.
         :param user: user data.
-        :param background_tasks: task that runs in the background.
         :return: UserModel.
         """
         # 1. Add new user into db.
         new_user_obj: UserModel = self.user_operation.add_obj(user)
 
-        # 2. Compose email with action link
-        email, params = compose_email_with_action_link(username=user.username,
-                                                       email=user.email,
-                                                       action='confirm_email',
-                                                       prefix_link=settings.CONFIRM_EMAIL_URL
-                                                       )
-        message, template_name = params
-
-        # 3. Start sending letter to email with background task.
-        background_tasks.add_task(email.send_message,
-                                  message=message,
-                                  template_name=template_name,
-                                  )
+        # 2. Compose email with action link and
+        # start sending letter to email with celery.
+        send_email.delay(username=user.username,
+                         email=user.email,
+                         action='confirm_email'
+                         )
         return new_user_obj
 
     @router.post('/users/auth/confirm-reset-password/{sign}/',

@@ -2,9 +2,9 @@ version: '3.9'
 
 services:
   postgresql_db:
-    image: postgres
-    restart: always
     container_name: "restaurant-db"
+    restart: always
+    image: postgres
     environment:
       POSTGRES_USER: ${PG_SUPER_USER}
       POSTGRES_PASSWORD: ${PG_SUPER_PASSWORD}
@@ -12,18 +12,21 @@ services:
       - restaurant-db:/var/lib/postgresql/data
     expose:
       - ${PG_PORT}
-    env_file:
-      - ../.env
     networks:
       - restaurant_network
+    env_file:
+      - ../.env
 
   nginx:
-    image: nginx:1.23.1-alpine
-    restart: always
     container_name: "restaurant-nginx"
+    restart: always
+    image: nginx:1.23.1-alpine
     depends_on:
-      - api
       - postgresql_db
+      - backend
+      - redis
+      - celery_worker
+      - flower
     volumes:
       - ../nginx/default.conf:/etc/nginx/conf.d/default.conf
     ports:
