@@ -51,10 +51,6 @@ COPY --from=pip-poetry-base $PYSETUP_PATH $PYSETUP_PATH
 # Install all deps using poetry
 RUN poetry install
 
-# Install all deps using poetry and install uvicorn globally to support WebSocket Nginx
-RUN poetry install && \
-    pip install --no-cache-dir --target=$PIP_DEPENDS uvicorn[standard]
-
 
 # -----------------------------------------------------------
 # 'DEVELOPMENT' stage installs all dev deps and can be used to develop code.
@@ -65,18 +61,12 @@ ENV FASTAPI_ENV=development
 COPY --from=poetry-base $POETRY_HOME $POETRY_HOME
 COPY --from=poetry-base $PYSETUP_PATH $PYSETUP_PATH
 
-# Copying pip depends into image
-COPY --from=poetry-base $PIP_DEPENDS $PIP_DEPENDS
-
 # Copying our entrypoint
 COPY ./docker/docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 WORKDIR /app
 COPY . .
-
-# Add pip dependencies path to env
-ENV PYTHONPATH=${PYTHONPATH}:$PIP_DEPENDS
 
 
 # -----------------------------------------------------------
