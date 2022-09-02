@@ -11,9 +11,12 @@ This application is designed to manage the data of restaurant.
 ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
 ![Pytest](https://img.shields.io/badge/pytest-003153.svg?style=for-the-badge&logo=pytest&logoColor=gray)
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Docker-compose](https://img.shields.io/badge/docker--compose-6495ED.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![Celery](https://img.shields.io/badge/Celery-%2300C7B7.svg?style=for-the-badge&logo=Celery)
+![Flower](https://img.shields.io/badge/F-Flower-green.svg?style=for-the-badge&logo=Celery)
 
 - `FastAPI`
 - `Pydantic`
@@ -22,8 +25,10 @@ This application is designed to manage the data of restaurant.
 - `Swagger`
 - `Pytest`
 - `PostgreSQL`
+- `Redis`
 - `Docker (docker-compose)`
 - `Nginx`
+- `Celery + Flower`
 ---
 ## Project description:
 **Use PREFIX `/api/v1` before each endpoint.**
@@ -652,6 +657,7 @@ PG_PORT=postgres_port  (by default: 5432)
 PG_USER_DB=your_database_name (by default: restaurant)
 PG_USER=your_user_name (example: admin)
 PG_USER_PASSWORD=your_user_password
+INSERT_PREPARED_DATA=FALSE (`TRUE` if you want to populate the db with test or prepared data)
 
 MAIL_USERNAME=your_email
 MAIL_PASSWORD=youe_email_password
@@ -659,9 +665,14 @@ MAIL_FROM=your_email
 MAIL_PORT=your_port
 MAIL_SERVER=your_mail_server
 MAIL_FROM_NAME=your_email
-```
 
-Or you can set these variables yourself.
+REDIS_HOST=redis (`redis` if you using docker-compose)
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+
+FLOWER_USER=your_username
+FLOWER_PASSWORD=your_user_password
+```
 
 ### Installation via Docker-compose:
 
@@ -730,7 +741,7 @@ OR
 **If you use development mode, you can run pytest:**
 - First, enter to the container:
     ```commandline
-    docker exec -it restaurant-api-dev bash
+    docker exec -it restaurant-backend-dev bash
     ```
 - Second, run `pytest` command:
     ```bash
@@ -897,44 +908,60 @@ alembic upgrade head
 
 ---
 ## CLI
+<details>
+<summary>CREATING DATABASE</summary>
+
 **Simple command line interface, that:**
 
 1) allows you to create db:
    ``` commandline
-   py -m src.db --create_db
+   python -m src.db --create_db
    ```
 2) allows you to drop db:
    ``` commandline
-   py -m src.db --drop_db
+   python -m src.db --drop_db
    ```
 3) And contains optional arguments:
     - `-d`, `--db_name`, allows assign db name:
    
         ``` commandline
-        py -m src.db --drop_db -d your_db_name
+        python -m src.db --drop_db -d your_db_name
         ```
 
     - `-u`, `--user_name`, allows assign username:
    
         ``` commandline
-        py -m src.db --create_db -u your_user_name
+        python -m src.db --create_db -u your_user_name
         ```
     
     - `-r`, `--role_name`, allows assign role name:
    
         ``` commandline
-        py -m src.db --create_db -r your_role_name
+        python -m src.db --create_db -r your_role_name
         ```
     
     - `-p`, `--user_password`, allows assign user password:
    
         ``` commandline
-        py -m src.db --create_db -p your_user_password
+        python -m src.db --create_db -p your_user_password
         ```
 4) Helper:
     ``` commandline
-    py -m src.db -h
+    python -m src.db -h
     ```
 
 **IMPORTANT:** **If the arguments is not specified, it is taken from the env variables or set by default.**
+</details>
 
+<details>
+<summary>POPULATING DATABASE</summary>
+
+1) Populate the empty database with prepared data.:
+   ``` commandline
+   python -m src.utils.db_populating --populate_db
+   ```
+2) Helper:
+    ``` commandline
+    python -m src.utils.db_populating -h
+    ```
+</details>
