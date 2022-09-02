@@ -9,18 +9,18 @@ The `--dev` flag is required to manage development docker containers.
 
 ## COMMANDS:
 
-```bash
+```commandline
 bash start.sh --dev
 ```
 
-```bash
+```commandline
 bash restart.sh --dev
 ```
 
-```bash
+```commandline
 bash stop.sh --dev
 ```
 
-```bash
+```commandline
 bash remove.sh --dev
 ```

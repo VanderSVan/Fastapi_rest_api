@@ -115,7 +115,7 @@ class TableOutputPatch:
 
 @dataclass
 class TableOutputPost:
-    summary: Optional[str] = 'Post table by table id'
+    summary: Optional[str] = 'Add new table'
     description: Optional[str] = (
         "**Adds** new table into db. <br />"
         "Only available to **superuser or admin.**"
