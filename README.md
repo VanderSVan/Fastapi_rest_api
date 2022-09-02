@@ -759,6 +759,13 @@ If you set `INSERT_PREPARED_DATA` to `TRUE`, just enter following data:
     password: 1478523690
     ```
 ![swagger-authorize](screenshots/swagger_authorize_2.png)
+
+You can also see the flower dashboard. 
+For this just follow the link **[http://0.0.0.0:8080/flower/](http://0.0.0.0:8080/flower/)**.
+If you set `FLOWER_USER` and `FLOWER_PASSWORD` before, you will need them now.
+
+![flower_dashboard](screenshots/flower_dashboard.png)
+
 </details>
 
 <details>
