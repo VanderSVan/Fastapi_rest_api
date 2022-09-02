@@ -19,7 +19,7 @@ def set_level_for_other_loggers(excluding: list, level_name: str = 'CRITICAL') -
             logging.getLogger(logger_name).setLevel(processed_level_name)
 
 
-set_level_for_other_loggers(excluding=['uvicorn', 'sqlalchemy'], level_name='ERROR')
+set_level_for_other_loggers(excluding=['uvicorn', 'sqlalchemy', 'celery'], level_name='ERROR')
 logging.config.dictConfig(logger_config)
 logger = logging.getLogger('full')
 

@@ -101,19 +101,23 @@ def compose_email_with_action_link(
         username: str,
         email: str,
         action: Literal['confirm_email'] | Literal['reset_password'],
-        prefix_link: str
 ) -> tuple[FastMail, list[MessageSchema, str]]:
     """Sends email letter that contain action link."""
 
     # 1. Encode the username and pasting it into the url
     encoded_user_data: str = Signer.sign_object({'username': username})
-    action_link: str = prefix_link.format(encoded_user_data)
 
     # 2. Composing a letter to send. Letter with action link.
     match action:
         case 'confirm_email':
+            # pasting encoded username into the url
+            action_link: str = settings.CONFIRM_EMAIL_URL.format(encoded_user_data)
+
             email, params = compose_confirm_email(email=email, url=action_link)
         case 'reset_password':
+            # pasting encoded username into the url
+            action_link: str = settings.RESET_PASSWORD_URL.format(encoded_user_data)
+
             email, params = compose_reset_password_email(email=email, url=action_link)
         case _:
             logger.exception(
