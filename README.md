@@ -733,6 +733,16 @@ OR
 
 - **[http://0.0.0.0:8080/api/v1/redoc](http://0.0.0.0:8080/api/v1/redoc)**
 
+After you got swagger docs, you can log in.
+
+![swagger-docs](screenshots/swagger_authorize.png)
+
+If you set `INSERT_PREPARED_DATA` to `TRUE`, just enter following data:
+```
+username: superuser
+password: 12345678
+```
+![swagger-authorize](screenshots/swagger_authorize_2.png)
 </details>
 
 <details>
