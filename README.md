@@ -738,11 +738,34 @@ After you got swagger docs, you can log in.
 ![swagger-docs](screenshots/swagger_authorize.png)
 
 If you set `INSERT_PREPARED_DATA` to `TRUE`, just enter following data:
-```
-username: superuser
-password: 12345678
-```
+1) see work as superuser:
+    ```
+    username: superuser
+    password: 12345678
+    ```
+2) see work as admin:
+    ```
+    username: admin
+    password: 0123456789
+    ```
+3) see work as an authorized and confirmed client
+    ```
+    username: client1
+    password: 147852369
+    ```
+4) see work as an authorized and unconfirmed client
+    ```
+    username: client2
+    password: 1478523690
+    ```
 ![swagger-authorize](screenshots/swagger_authorize_2.png)
+
+You can also see the flower dashboard. 
+For this just follow the link **[http://0.0.0.0:8080/flower/](http://0.0.0.0:8080/flower/)**.
+If you set `FLOWER_USER` and `FLOWER_PASSWORD` before, you will need them now.
+
+![flower_dashboard](screenshots/flower_dashboard.png)
+
 </details>
 
 <details>
